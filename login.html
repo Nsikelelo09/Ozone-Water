@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Pure Water Store</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff4d4d;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-family: Arial, sans-serif;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+
+    <form class="form-box" onsubmit="loginUser(event)">
+        <h2>Login</h2>
+
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+
+        <button type="submit">Login</button>
+
+        <p>
+            Don't have an account?
+            <a href="signup.html">Sign Up</a>
+        </p>
+    </form>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 3000);
+}
+
+function loginUser(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    // 🔐 recognized account
+    const validEmail = "test@ozone.com";
+    const validPassword = "1234";
+
+    if (email === validEmail && password === validPassword) {
+        // ✅ recognized → go to products page
+        window.location.href = "products.html";
+    } else {
+        showToast("Don't have an account. You should sign up.");
+    }
+}
+</script>
+
+</body>
+</html>
