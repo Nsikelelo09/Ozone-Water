@@ -3,46 +3,560 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products - Pure Water Store</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Menu - Ozone Amanzi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            /* Use the same background image as home page */
+            background-image: url('water-bg.jpg.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #fff;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: -1;
+        }
+
+        header {
+            background-color: rgba(0, 119, 182, 0.85);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 30px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+            color: #ffdd99;
+        }
+
+        .products-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .products-container h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .products-container p {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            color: #f0f0f0;
+        }
+
+        .product-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-right: 340px; /* space for cart sidebar */
+        }
+
+        .product-card {
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 20px;
+            width: 260px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .product-image {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+
+        .product-card h3 {
+            font-size: 1.3rem;
+            color: #0077b3;
+            margin-bottom: 5px;
+        }
+
+        .product-card .price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #00a8ff;
+            margin: 8px 0;
+        }
+
+        .quantity-input {
+            width: 80px;
+            padding: 6px;
+            text-align: center;
+            font-size: 1rem;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            margin: 10px 0;
+        }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            position: fixed;
+            right: 20px;
+            top: 100px;
+            width: 320px;
+            background: white;
+            color: #333;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 100;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .cart-sidebar h3 {
+            margin-top: 0;
+            color: #0077b3;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .cart-total {
+            font-weight: bold;
+            border-top: 1px solid #ccc;
+            margin-top: 10px;
+            padding-top: 8px;
+        }
+
+        .delivery-options {
+            margin-top: 15px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        .delivery-options label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        .datetime-picker {
+            margin-top: 10px;
+            padding: 8px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+
+        .datetime-picker input {
+            width: 100%;
+            margin: 5px 0;
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .grand-total {
+            font-size: 1.2rem;
+            color: #28a745;
+            margin-top: 10px;
+        }
+
+        .btn-checkout {
+            background-color: #28a745;
+            width: 100%;
+            margin-top: 15px;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .btn-checkout:hover {
+            background-color: #218838;
+        }
+
+        .remove-item {
+            color: red;
+            cursor: pointer;
+            margin-left: 8px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 800px) {
+            .product-grid {
+                margin-right: 0;
+            }
+            .cart-sidebar {
+                position: static;
+                width: auto;
+                margin: 20px;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.7);
+            margin-top: 50px;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
 
 <header>
-    <h1>Our Water Products</h1>
-
+    <h1>Ozone Amanzi</h1>
     <nav>
         <a href="index.html">Home</a>
+        <a href="products.html">Menu</a>
         <a href="login.html">Login</a>
-        <a href="signup.html">Sign Up</a>
     </nav>
 </header>
 
-<section class="products">
+<div class="products-container">
+    <h2>Choose Your Bottles</h2>
+    <p>Select quantity (1 to 100) for each size</p>
+    <div class="product-grid" id="product-grid"></div>
+</div>
 
-    <div class="card">
-        <h3>500ml Bottle</h3>
-        <p>R10</p>
-        <button>Buy Now</button>
+<!-- Cart Sidebar -->
+<div class="cart-sidebar" id="cart-sidebar">
+    <h3>🛒 Your Cart</h3>
+    <div id="cart-items-list">Cart is empty.</div>
+    <div id="cart-subtotal" class="cart-total">Subtotal: R0.00</div>
+    
+    <div class="delivery-options" id="delivery-options" style="display: none;">
+        <p><strong>Delivery or Collection</strong></p>
+        <label>
+            <input type="radio" name="delivery" value="delivery"> Delivery (+R200)
+        </label>
+        <label>
+            <input type="radio" name="delivery" value="collect" checked> Collection (Free)
+        </label>
+        
+        <!-- Collection date & time picker (only shown when collect is selected) -->
+        <div id="collection-datetime" class="datetime-picker" style="display: none;">
+            <label>Pickup Date:</label>
+            <input type="date" id="pickup-date" min="">
+            <label>Pickup Time:</label>
+            <input type="time" id="pickup-time" step="60">
+            <p style="font-size:0.75rem; color:#555;">*Past dates/times cannot be selected</p>
+        </div>
+        
+        <div id="grand-total" class="grand-total">Total: R0.00</div>
     </div>
 
-    <div class="card">
-        <h3>1L Bottle</h3>
-        <p>R15</p>
-        <button>Buy Now</button>
-    </div>
-
-    <div class="card">
-        <h3>5L Bottle</h3>
-        <p>R40</p>
-        <button>Buy Now</button>
-    </div>
-
-</section>
+    <button id="checkout-btn" class="btn-checkout">Proceed to Checkout</button>
+</div>
 
 <footer>
-    <p>© 2026 Pure Water Store</p>
+    <p>© 2026 Ozone Amanzi – Fresh Water Delivery</p>
 </footer>
 
+<script>
+    // Product catalog
+    const products = [
+        { id: 1, name: "500ml Bottle", price: 10, image: "https://cdn.pixabay.com/photo/2020/08/06/13/08/water-bottle-5467783_640.png", desc: "Perfect for on-the-go" },
+        { id: 2, name: "1L Bottle", price: 20, image: "https://cdn.pixabay.com/photo/2017/12/09/08/03/water-bottle-3008356_640.png", desc: "Ideal for daily hydration" },
+        { id: 3, name: "5L Bottle", price: 100, image: "https://cdn.pixabay.com/photo/2020/07/02/19/07/water-bottle-5363105_640.png", desc: "Family size, great for home" }
+    ];
+
+    // Cart: { id, name, price, quantity }
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    let deliveryMethod = "collect";   // 'delivery' or 'collect'
+    const deliveryFee = 200;
+
+    // Helper: update localStorage and refresh UI
+    function saveCart() {
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+        updateDeliveryOptionsVisibility();
+        computeGrandTotal();
+    }
+
+    // Update quantity for a product (called from number input)
+    function setQuantity(productId, newQty) {
+        if (newQty < 0) newQty = 0;
+        if (newQty === 0) {
+            cart = cart.filter(item => item.id !== productId);
+        } else {
+            const existing = cart.find(item => item.id === productId);
+            if (existing) {
+                existing.quantity = newQty;
+            } else {
+                const product = products.find(p => p.id === productId);
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: newQty
+                });
+            }
+        }
+        saveCart();
+        // Also update the number input field for this product to reflect the current quantity
+        const inputField = document.querySelector(`.qty-input[data-id='${productId}']`);
+        if (inputField) inputField.value = newQty;
+    }
+
+    function removeItem(productId) {
+        cart = cart.filter(item => item.id !== productId);
+        saveCart();
+    }
+
+    // Compute subtotal
+    function computeSubtotal() {
+        let subtotal = 0;
+        cart.forEach(item => {
+            subtotal += item.price * item.quantity;
+        });
+        return subtotal;
+    }
+
+    function computeGrandTotal() {
+        const subtotal = computeSubtotal();
+        return deliveryMethod === "delivery" ? subtotal + deliveryFee : subtotal;
+    }
+
+    // Show/hide delivery options and collection datetime picker
+    function updateDeliveryOptionsVisibility() {
+        const deliveryDiv = document.getElementById("delivery-options");
+        if (cart.length === 0) {
+            deliveryDiv.style.display = "none";
+        } else {
+            deliveryDiv.style.display = "block";
+        }
+        // Show/hide datetime picker based on delivery method
+        const isCollect = deliveryMethod === "collect";
+        const datetimeDiv = document.getElementById("collection-datetime");
+        if (datetimeDiv) {
+            datetimeDiv.style.display = isCollect && cart.length > 0 ? "block" : "none";
+        }
+    }
+
+    // Render cart sidebar
+    function renderCart() {
+        const cartDiv = document.getElementById("cart-items-list");
+        const subtotalDiv = document.getElementById("cart-subtotal");
+        if (cart.length === 0) {
+            cartDiv.innerHTML = "Cart is empty.";
+            subtotalDiv.innerHTML = "Subtotal: R0.00";
+            document.getElementById("grand-total").innerHTML = "Total: R0.00";
+            return;
+        }
+        let html = "";
+        cart.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            html += `
+                <div class="cart-item">
+                    <span>${item.name} x${item.quantity}</span>
+                    <span>R${itemTotal.toFixed(2)}
+                        <span class="remove-item" data-id="${item.id}">❌</span>
+                    </span>
+                </div>
+            `;
+        });
+        cartDiv.innerHTML = html;
+        const subtotal = computeSubtotal();
+        subtotalDiv.innerHTML = `Subtotal: R${subtotal.toFixed(2)}`;
+        const total = computeGrandTotal();
+        document.getElementById("grand-total").innerHTML = `Total: R${total.toFixed(2)}`;
+
+        // attach remove listeners
+        document.querySelectorAll('.remove-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(btn.dataset.id);
+                removeItem(id);
+                // Also reset the number input for that product to 0
+                const inputField = document.querySelector(`.qty-input[data-id='${id}']`);
+                if (inputField) inputField.value = 0;
+            });
+        });
+    }
+
+    // Render product cards with number input (1-100)
+    function renderProducts() {
+        const grid = document.getElementById("product-grid");
+        grid.innerHTML = "";
+        products.forEach(prod => {
+            const cartItem = cart.find(i => i.id === prod.id);
+            const qty = cartItem ? cartItem.quantity : 0;
+            const card = document.createElement("div");
+            card.className = "product-card";
+            card.innerHTML = `
+                <img class="product-image" src="${prod.image}" alt="${prod.name}">
+                <h3>${prod.name}</h3>
+                <div class="price">R${prod.price}</div>
+                <input type="number" class="quantity-input qty-input" data-id="${prod.id}" value="${qty}" min="0" max="100" step="1">
+                <div class="description">${prod.desc}</div>
+            `;
+            grid.appendChild(card);
+        });
+        // attach change event to each number input
+        document.querySelectorAll('.qty-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                let val = parseInt(e.target.value);
+                if (isNaN(val)) val = 0;
+                if (val < 0) val = 0;
+                if (val > 100) val = 100;
+                const id = parseInt(input.dataset.id);
+                setQuantity(id, val);
+            });
+        });
+    }
+
+    // Set min date for date picker (today) and enforce time restrictions
+    function initDateTimePicker() {
+        const dateInput = document.getElementById("pickup-date");
+        const timeInput = document.getElementById("pickup-time");
+        if (!dateInput) return;
+        
+        // Set min to today's date
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+        dateInput.min = todayStr;
+        
+        // For time: disable past times only if selected date is today
+        function updateTimeMin() {
+            const selectedDate = dateInput.value;
+            if (selectedDate === todayStr) {
+                // Set min time to current time (rounded up to next minute)
+                const now = new Date();
+                let hours = now.getHours();
+                let minutes = now.getMinutes() + 1; // allow next minute
+                if (minutes >= 60) {
+                    minutes = 0;
+                    hours++;
+                }
+                const timeMin = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                timeInput.min = timeMin;
+                // If currently selected time is before min, reset to min
+                if (timeInput.value && timeInput.value < timeMin) {
+                    timeInput.value = timeMin;
+                }
+            } else {
+                timeInput.min = "00:00";
+            }
+        }
+        
+        dateInput.addEventListener('change', updateTimeMin);
+        updateTimeMin(); // initial call
+    }
+
+    // Delivery option change handler
+    function initDeliveryOptions() {
+        const radios = document.querySelectorAll('input[name="delivery"]');
+        radios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                deliveryMethod = e.target.value;
+                const isCollect = (deliveryMethod === "collect");
+                const datetimeDiv = document.getElementById("collection-datetime");
+                if (datetimeDiv) {
+                    datetimeDiv.style.display = (isCollect && cart.length > 0) ? "block" : "none";
+                }
+                // Recompute total
+                const total = computeGrandTotal();
+                document.getElementById("grand-total").innerHTML = `Total: R${total.toFixed(2)}`;
+                const subtotalDiv = document.getElementById("cart-subtotal");
+                subtotalDiv.innerHTML = `Subtotal: R${computeSubtotal().toFixed(2)}`;
+            });
+        });
+        // Set default checked
+        const collectRadio = document.querySelector('input[value="collect"]');
+        if (collectRadio) collectRadio.checked = true;
+        deliveryMethod = "collect";
+    }
+
+    // Proceed to checkout: ensure collection date/time if collection selected
+    function proceedToCheckout() {
+        if (cart.length === 0) {
+            alert("Your cart is empty. Please add bottles.");
+            return;
+        }
+        if (deliveryMethod === "collect") {
+            const dateInput = document.getElementById("pickup-date");
+            const timeInput = document.getElementById("pickup-time");
+            if (!dateInput.value) {
+                alert("Please select a pickup date.");
+                return;
+            }
+            if (!timeInput.value) {
+                alert("Please select a pickup time.");
+                return;
+            }
+            // Store collection info for checkout page
+            localStorage.setItem("pickupDate", dateInput.value);
+            localStorage.setItem("pickupTime", timeInput.value);
+        } else {
+            localStorage.removeItem("pickupDate");
+            localStorage.removeItem("pickupTime");
+        }
+        localStorage.setItem("deliveryMethod", deliveryMethod);
+        window.location.href = "login.html?redirect=checkout";
+    }
+
+    // Main setup
+    function setup() {
+        renderProducts();
+        renderCart();
+        updateDeliveryOptionsVisibility();
+        initDeliveryOptions();
+        initDateTimePicker();
+        document.getElementById("checkout-btn").addEventListener("click", proceedToCheckout);
+    }
+
+    setup();
+</script>
 </body>
 </html>
+         
