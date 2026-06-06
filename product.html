@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Products | Ozone Amanzi</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+/* PREMIUM WATER BACKGROUND */
+body{
+    background: url('https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg') center/cover no-repeat fixed;
+    min-height:100vh;
+    color:#fff;
+}
+
+/* DARK + BLUE TINT OVERLAY */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background: linear-gradient(135deg, rgba(0,20,40,0.75), rgba(0,0,0,0.65));
+    z-index:-1;
+}
+
+/* HEADER */
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 50px;
+    background:rgba(0,0,0,0.35);
+    backdrop-filter: blur(12px);
+    position:sticky;
+    top:0;
+    z-index:10;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+header h1{
+    font-size:22px;
+    color:#00d4ff;
+    letter-spacing:1px;
+}
+
+nav a{
+    color:#fff;
+    margin-left:18px;
+    text-decoration:none;
+    font-weight:500;
+    transition:0.3s;
+}
+
+nav a:hover{
+    color:#00d4ff;
+}
+
+/* HERO */
+.hero{
+    text-align:center;
+    padding:60px 20px 30px;
+}
+
+.hero h2{
+    font-size:36px;
+    margin-bottom:8px;
+}
+
+.hero p{
+    opacity:0.85;
+}
+
+/* TRUST BADGES */
+.badges{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+
+.badge{
+    background:rgba(255,255,255,0.08);
+    padding:8px 14px;
+    border-radius:20px;
+    font-size:13px;
+    border:1px solid rgba(255,255,255,0.1);
+}
+
+/* CONTAINER */
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:30px;
+}
+
+/* PRODUCT GRID */
+.product-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:22px;
+}
+
+/* PRODUCT CARD (GLASS STYLE) */
+.product-card{
+    background:rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:16px;
+    padding:18px;
+    text-align:center;
+    transition:0.3s;
+}
+
+.product-card:hover{
+    transform:translateY(-8px);
+    background:rgba(255,255,255,0.12);
+}
+
+.product-card img{
+    width:100%;
+    height:200px;
+    object-fit:cover;
+    border-radius:12px;
+    margin-bottom:10px;
+}
+
+.price{
+    color:#00ff88;
+    font-size:18px;
+    font-weight:700;
+    margin:8px 0;
+}
+
+.qty{
+    width:70px;
+    padding:8px;
+    border-radius:10px;
+    border:none;
+    text-align:center;
+    margin-top:5px;
+}
+
+/* BUTTON */
+.btn{
+    margin-top:12px;
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.3s;
+}
+
+.add-btn{
+    background:#00d4ff;
+    color:#001018;
+}
+
+.add-btn:hover{
+    background:#00aacc;
+}
+
+/* ACTION BAR */
+.action-bar{
+    margin-top:30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    padding:15px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,0.1);
+}
+
+.cart-btn{
+    background:#0f172a;
+    color:white;
+    padding:10px 14px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.checkout-btn{
+    background:#00ff88;
+    color:#00150a;
+    padding:10px 14px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+    header{
+        flex-direction:column;
+        gap:10px;
+        padding:15px;
+    }
+
+    .hero h2{
+        font-size:26px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Ozone Amanzi</h1>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="cart.html">Cart 🛒 <span id="cart-count">0</span></a>
+    </nav>
+</header>
+
+<div class="hero">
+    <h2>Premium Purified Water</h2>
+    <p>Clean • Safe • Delivered to your door</p>
+
+    <div class="badges">
+        <div class="badge">💧 100% Purified</div>
+        <div class="badge">🚚 Fast Delivery</div>
+        <div class="badge">🔒 Trusted Quality</div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="product-grid" id="product-grid"></div>
+
+    <div class="action-bar">
+        <button class="cart-btn" onclick="viewCart()">View Cart</button>
+        <button class="checkout-btn" onclick="goToCheckout()">Checkout</button>
+    </div>
+
+</div>
+
+<script>
+const products = [
+    { id:1, name:"Ozone Amanzi 500ml", price:10, image:"https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg" },
+    { id:2, name:"Ozone Amanzi 1L", price:20, image:"https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg" },
+    { id:3, name:"Ozone Amanzi 5L", price:100, image:"https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg" }
+];
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function save(){
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function render(){
+    let grid = document.getElementById("product-grid");
+    grid.innerHTML = "";
+
+    products.forEach(p => {
+        grid.innerHTML += `
+        <div class="product-card">
+
+            <img src="${p.image}" alt="${p.name}">
+
+            <h3>${p.name}</h3>
+
+            <p class="price">R${p.price}</p>
+
+            <input type="number" min="1" value="1" class="qty-${p.id} qty">
+
+            <button class="btn add-btn" onclick="addToCart(${p.id})">
+                Add to Cart
+            </button>
+
+        </div>`;
+    });
+}
+
+function addToCart(id){
+    let product = products.find(p => p.id === id);
+    let qty = parseInt(document.querySelector(".qty-" + id).value);
+
+    if(!qty || qty <= 0){
+        alert("Enter valid quantity");
+        return;
+    }
+
+    let existing = cart.find(i => i.id === id);
+
+    if(existing){
+        existing.quantity += qty;
+    }else{
+        cart.push({
+            id:product.id,
+            name:product.name,
+            price:product.price,
+            quantity:qty,
+            image:product.image
+        });
+    }
+
+    save();
+    updateCount();
+}
+
+function updateCount(){
+    let total = cart.reduce((sum,i)=>sum+i.quantity,0);
+    document.getElementById("cart-count").innerText = total;
+}
+
+function viewCart(){
+    window.location.href = "cart.html";
+}
+
+function goToCheckout(){
+
+    if(cart.length === 0){
+        alert("Your cart is empty");
+        return;
+    }
+
+    // always send user to login first
+    localStorage.setItem("redirectAfterLogin", "payment.html");
+    window.location.href = "login.html";
+}
+render();
+updateCount();
+</script>
+
+</body>
+</html>

@@ -1,84 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Pure Water Store</title>
-    <link rel="stylesheet" href="style.css">
-
-    <style>
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #ff4d4d;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.4s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            font-family: Arial, sans-serif;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Login</title>
+<link rel="stylesheet" href="style.css">
 </head>
+<script src="app.js"></script>
 <body>
+ <div id="toast"></div>   
 
-<div class="form-container">
+<header>
+    <h1>Ozone Amanzi</h1>
+</header>
 
-    <form class="form-box" onsubmit="loginUser(event)">
-        <h2>Login</h2>
+<div class="login-container">
+    <div class="login-card">
 
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Password" required>
+        <h2>Welcome Back</h2>
+        <p class="login-text">Sign in to continue ordering fresh water.</p>
 
-        <button type="submit">Login</button>
+        <form onsubmit="loginUser(event)">
 
-        <p>
+            <div class="input-group">
+                <label>Email Address</label>
+                <input id="email" type="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input id="password" type="password" placeholder="Enter your password" required>
+            </div>
+
+            <button class="btn-login" type="submit">Login</button>
+
+        </form>
+
+        <p class="signup-link">
             Don't have an account?
-            <a href="signup.html">Sign Up</a>
+            <a href="signup.html">Create Account</a>
         </p>
-    </form>
 
+    </div>
 </div>
 
-<div id="toast" class="toast"></div>
-
 <script>
-function showToast(message) {
-    const toast = document.getElementById("toast");
-    toast.textContent = message;
-    toast.classList.add("show");
-
-    setTimeout(() => {
-        toast.classList.remove("show");
-    }, 3000);
-}
-
-function loginUser(event) {
-    event.preventDefault();
+function loginUser(e){
+    e.preventDefault();
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    // 🔐 recognized account
-    const validEmail = "test@ozone.com";
-    const validPassword = "1234";
+    const storedUser = JSON.parse(localStorage.getItem("user"));
 
-    if (email === validEmail && password === validPassword) {
-        // ✅ recognized → go to products page
-        window.location.href = "products.html";
-    } else {
-        showToast("Don't have an account. You should sign up.");
+    // ❌ No account found
+    if(!storedUser){
+        showToast("No account found. Please sign up first.", "error");
+        return;
     }
+
+    // ❌ Wrong credentials
+    if(email !== storedUser.email || password !== storedUser.password){
+        showToast("Incorrect email or password. You should sign up.", "error");
+        return;
+    }
+
+    // ✅ Success
+    localStorage.setItem("loggedIn", "true");
+
+    showToast("Login successful!", "success");
+
+    setTimeout(() => {
+        const redirect = localStorage.getItem("redirectAfterLogin");
+
+        if(redirect){
+            localStorage.removeItem("redirectAfterLogin");
+            window.location.href = redirect;
+        }else{
+            window.location.href = "product.html";
+        }
+    }, 1000);
+}
+</script>
+
+</script>
+<script>
+
+    function showToast(message, type = "success"){
+    const toast = document.getElementById("toast");
+
+    toast.innerText = message;
+    toast.className = "";
+
+    toast.classList.add("show");
+    toast.classList.add(type);
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2500);
 }
 </script>
 
 </body>
+
 </html>

@@ -1,54 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ozone Water</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ozone Amanzi - Fresh Water Delivery</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+body{
+    min-height:100vh;
+    color:#fff;
+    background: url('https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg') center/cover no-repeat fixed;
+    position: relative;
+}
+
+/* dark overlay */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.65);
+    z-index:-1;
+}
+
+/* NAVBAR */
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 60px;
+    background:rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    position:sticky;
+    top:0;
+}
+
+header h1{
+    font-size:24px;
+    font-weight:700;
+    letter-spacing:1px;
+    color:#00d4ff;
+}
+
+nav a{
+    margin-left:20px;
+    text-decoration:none;
+    color:#fff;
+    font-weight:500;
+    transition:0.3s;
+}
+
+nav a:hover{
+    color:#00d4ff;
+}
+
+/* HERO */
+.hero{
+    text-align:center;
+    padding:120px 20px;
+}
+
+.hero h2{
+    font-size:48px;
+    margin-bottom:10px;
+}
+
+.hero p{
+    font-size:18px;
+    opacity:0.9;
+    margin-bottom:25px;
+}
+
+.btn{
+    display:inline-block;
+    padding:12px 28px;
+    background:#00d4ff;
+    color:#000;
+    font-weight:600;
+    border-radius:30px;
+    text-decoration:none;
+    transition:0.3s;
+}
+
+.btn:hover{
+    transform:scale(1.05);
+    background:#00aacc;
+}
+
+/* FEATURES */
+.features{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+    gap:20px;
+    padding:60px;
+}
+
+.card{
+    background:rgba(255,255,255,0.08);
+    padding:25px;
+    border-radius:15px;
+    backdrop-filter: blur(10px);
+    text-align:center;
+    transition:0.3s;
+    border:1px solid rgba(255,255,255,0.1);
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    background:rgba(255,255,255,0.12);
+}
+
+.card h3{
+    color:#00d4ff;
+    margin-bottom:10px;
+}
+
+/* FOOTER */
+footer{
+    text-align:center;
+    padding:20px;
+    background:rgba(0,0,0,0.5);
+    font-size:14px;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+    header{
+        padding:15px 20px;
+        flex-direction:column;
+    }
+
+    .hero h2{
+        font-size:32px;
+    }
+
+    .features{
+        padding:30px;
+    }
+}
+</style>
 </head>
+
 <body>
 
 <header>
     <h1>Ozone Amanzi</h1>
-
     <nav>
         <a href="index.html">Home</a>
+        <a href="product.html">Menu</a>
+        <a href="login.html">Login</a>
     </nav>
-    
-</p>
 </header>
 
 <section class="hero">
-    <h2>Fresh & Clean Drinking Water</h2>
-    <p>Healthy water delivered to your doorstep.</p>
-    <a href="login.html" class="btn">Shop Now</a>
+    <h2>Pure. Clean. Delivered.</h2>
+    <p>Fresh drinking water delivered straight to your doorstep</p>
+    <a class="btn" href="product.html">Shop Now</a>
 </section>
 
 <section class="features">
     <div class="card">
-        <h3>Pure Water</h3>
-        <p>100% purified and healthy.</p>
+        <h3>💧 Pure Water</h3>
+        <p>Scientifically purified and safe for daily consumption.</p>
     </div>
 
     <div class="card">
-        <h3>Fast Delivery</h3>
-        <p>Quick delivery to your location.</p>
+        <h3>🚚 Fast Delivery</h3>
+        <p>We deliver within hours in your local area.</p>
     </div>
 
     <div class="card">
-        <h3>Affordable</h3>
-        <p>Best prices for quality water.</p>
+        <h3>💰 Affordable</h3>
+        <p>High quality water at the best possible prices.</p>
     </div>
 </section>
 
 <footer>
-    <p>© 2026 Pure Water Store</p>
-    <p class="whatsapp">
-    WhatsApp: 
-    <a href="https://wa.me/27 78 168 8212" target="_blank">
-        +27 78 168 8212
-    </a>
-</p>
+    <p>© 2026 Ozone Amanzi. All rights reserved.</p>
 </footer>
 
 </body>

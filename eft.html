@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EFT Payment | Ozone Amanzi</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+/* BACKGROUND */
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    background:url('https://images.pexels.com/photos/259027/pexels-photo-259027.jpeg') center/cover no-repeat fixed;
+}
+
+/* OVERLAY */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:linear-gradient(135deg, rgba(0,10,30,0.75), rgba(0,0,0,0.85));
+    z-index:-1;
+}
+
+/* CONTAINER */
+.container{
+    width:100%;
+    max-width:850px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter: blur(15px);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 25px 70px rgba(0,0,0,0.6);
+}
+
+/* HEADER */
+.header{
+    text-align:center;
+    padding:30px;
+    background:rgba(37,99,235,0.15);
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.header h1{
+    font-size:26px;
+    margin-bottom:5px;
+}
+
+.header p{
+    opacity:0.85;
+}
+
+/* CONTENT */
+.content{
+    padding:30px;
+}
+
+/* BANK CARD */
+.bank-box{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.1);
+    padding:20px;
+    border-radius:14px;
+    margin-bottom:25px;
+}
+
+.bank-box h3{
+    color:#00d4ff;
+    margin-bottom:12px;
+}
+
+.bank-box p{
+    margin:6px 0;
+    color:#e2e8f0;
+}
+
+/* INPUTS */
+.form-group{
+    margin-bottom:15px;
+}
+
+label{
+    display:block;
+    margin-bottom:6px;
+    font-weight:500;
+    color:#cbd5e1;
+}
+
+input, select{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.2);
+    background:rgba(255,255,255,0.05);
+    color:#fff;
+    outline:none;
+}
+
+input::placeholder{
+    color:#94a3b8;
+}
+
+/* UPLOAD */
+.upload-box{
+    border:2px dashed rgba(255,255,255,0.3);
+    padding:15px;
+    border-radius:12px;
+    text-align:center;
+    background:rgba(255,255,255,0.05);
+}
+
+/* INSTRUCTIONS */
+.payment-summary{
+    margin-top:20px;
+    padding:18px;
+    border-radius:14px;
+    background:rgba(0,212,255,0.08);
+    border:1px solid rgba(0,212,255,0.2);
+}
+
+.payment-summary h3{
+    margin-bottom:10px;
+    color:#00d4ff;
+}
+
+.payment-summary p{
+    color:#e2e8f0;
+    margin:5px 0;
+}
+
+/* BUTTON */
+.btn{
+    width:100%;
+    margin-top:25px;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:#00d4ff;
+    color:#001018;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.btn:hover{
+    background:#00aacc;
+    transform:scale(1.02);
+}
+
+/* NOTE */
+.note{
+    text-align:center;
+    margin-top:15px;
+    font-size:13px;
+    opacity:0.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🏦 Secure EFT Payment</h1>
+        <p>Complete your transfer and submit proof of payment</p>
+    </div>
+
+    <div class="content">
+
+        <div class="bank-box">
+            <h3>Bank Details</h3>
+            <p><strong>Bank:</strong> Example Bank</p>
+            <p><strong>Account:</strong> Ozone Amanzi</p>
+            <p><strong>Number:</strong> 123456789</p>
+            <p><strong>Branch:</strong> 250655</p>
+            <p><strong>Reference:</strong> OZONE + Your Name</p>
+        </div>
+
+        <div class="form-group">
+            <label>Full Name</label>
+            <input id="name" placeholder="Enter your full name">
+        </div>
+
+        <div class="form-group">
+            <label>Bank Name</label>
+            <input id="bank" placeholder="e.g. FNB, Capitec">
+        </div>
+
+        <div class="form-group">
+            <label>Account Number</label>
+            <input id="acc" placeholder="Account number">
+        </div>
+
+        <div class="form-group">
+            <label>Payment Status</label>
+            <select id="proof">
+                <option value="">Select</option>
+                <option value="yes">I have paid</option>
+                <option value="no">Not yet paid</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Upload Proof</label>
+            <div class="upload-box">
+                <input type="file" id="pop">
+            </div>
+        </div>
+
+        <div class="payment-summary">
+            <h3>Steps</h3>
+            <p>1. Send EFT to bank details above</p>
+            <p>2. Use your name as reference</p>
+            <p>3. Upload proof of payment</p>
+            <p>4. Submit for verification</p>
+        </div>
+
+        <button class="btn" onclick="submitEFT()">
+            Submit Payment
+        </button>
+
+        <p class="note">
+            Your order will be processed after verification
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+function submitEFT(){
+
+    const name = document.getElementById("name").value;
+    const bank = document.getElementById("bank").value;
+    const acc = document.getElementById("acc").value;
+    const proof = document.getElementById("proof").value;
+
+    if(!name || !bank || !acc || !proof){
+        alert("Please complete all fields");
+        return;
+    }
+
+    if(proof !== "yes"){
+        alert("Please complete payment first");
+        return;
+    }
+
+    localStorage.removeItem("cart");
+    localStorage.removeItem("paymentMethod");
+
+    alert("EFT submitted successfully!");
+
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>

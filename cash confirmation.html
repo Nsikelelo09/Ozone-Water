@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cash Confirmation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="box">
+    <h2>Cash Order Confirmed 💵</h2>
+
+    <p>
+        Your order has been placed successfully.<br>
+        You will pay on delivery or collection.
+    </p>
+
+    <button onclick="finishOrder()">Continue</button>
+</div>
+
+<script>
+function finishOrder(){
+
+    // clear cart properly AFTER user sees confirmation
+    localStorage.removeItem("cart");
+    localStorage.removeItem("paymentMethod");
+
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
