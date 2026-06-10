@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <div id="ordersSection">
+        <h2>Orders</h2>
+        <div id="ordersList"></div>
+    </div>
+    <div id="paymentsSection">
+        <h2>Payments</h2>
+        <div id="paymentsList"></div>
+    </div>
+    <script>
+        // Check admin access
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        if (!currentUser || !currentUser.isAdmin) {
+            alert("Access denied. Redirecting to login.");
+            window.location.href = "login.html";
+        }
+
+        // Load orders
+        const orders = JSON.parse(localStorage.getItem("orders")) || [];
+        const ordersDiv = document.getElementById("ordersList");
+        if (orders.length === 0) {
+            ordersDiv.innerText = "No orders yet.";
+        } else {
+            orders.forEach(order => {
+                ordersDiv.innerHTML += `<p><strong>Order ID:</strong> ${order.id} | <strong>User:</strong> ${order.userEmail} | <strong>Total:</strong> $${order.total}</p>`;
+            });
+        }
+
+        // Load payments
+        const payments = JSON.parse(localStorage.getItem("payments")) || [];
+        const paymentsDiv = document.getElementById("paymentsList");
+        if (payments.length === 0) {
+            paymentsDiv.innerText = "No payments recorded.";
+        } else {
+            payments.forEach(payment => {
+                paymentsDiv.innerHTML += `<p><strong>Payment ID:</strong> ${payment.id} | <strong>Amount:</strong> $${payment.amount} | <strong>Status:</strong> ${payment.status}</p>`;
+            });
+        }
+    </script>
+</body>
+</html>
