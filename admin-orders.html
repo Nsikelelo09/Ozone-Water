@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Orders | Ozone Amanzi</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    color:white;
+    padding:30px;
+
+    background:
+    linear-gradient(
+        rgba(2,6,23,0.9),
+        rgba(15,23,42,0.9)
+    ),
+    url('https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=1920&q=80');
+
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.header h1{
+    color:#38bdf8;
+}
+
+.back-btn{
+    text-decoration:none;
+    color:white;
+    background:#2563eb;
+    padding:12px 20px;
+    border-radius:10px;
+    transition:.3s;
+}
+
+.back-btn:hover{
+    background:#1d4ed8;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.stat-card{
+    background:rgba(30,41,59,0.8);
+    backdrop-filter:blur(12px);
+    padding:25px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.1);
+}
+
+.stat-card h3{
+    color:#94a3b8;
+    margin-bottom:10px;
+}
+
+.stat-card h1{
+    color:#38bdf8;
+}
+
+.table-container{
+    background:rgba(30,41,59,0.8);
+    backdrop-filter:blur(12px);
+    border-radius:20px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.1);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:rgba(255,255,255,0.05);
+    color:#94a3b8;
+    text-transform:uppercase;
+    font-size:13px;
+}
+
+th,td{
+    padding:16px;
+    text-align:left;
+}
+
+tr{
+    border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+tr:hover{
+    background:rgba(255,255,255,0.03);
+}
+
+.status{
+    padding:8px 15px;
+    border-radius:30px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.pending{
+    background:#f59e0b;
+    color:black;
+}
+
+.verified{
+    background:#38bdf8;
+    color:black;
+}
+
+.delivered{
+    background:#22c55e;
+    color:white;
+}
+
+button{
+    border:none;
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    margin-right:5px;
+    transition:.3s;
+    font-weight:600;
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+.verify{
+    background:#38bdf8;
+}
+
+.deliver{
+    background:#22c55e;
+}
+
+.delete{
+    background:#ef4444;
+    color:white;
+}
+
+.footer{
+    margin-top:25px;
+    text-align:center;
+    color:#94a3b8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+<div>
+<h1>📦 Orders Management</h1>
+<p style="color:#94a3b8">
+Manage customer orders, deliveries and payments.
+</p>
+</div>
+
+<a href="admin-dashboard.html" class="back-btn">
+← Dashboard
+</a>
+
+</div>
+
+<div class="stats">
+
+<div class="stat-card">
+<h3>Total Orders</h3>
+<h1 id="totalOrders">0</h1>
+</div>
+
+<div class="stat-card">
+<h3>Pending</h3>
+<h1 id="pendingOrders">0</h1>
+</div>
+
+<div class="stat-card">
+<h3>Delivered</h3>
+<h1 id="deliveredOrders">0</h1>
+</div>
+
+</div>
+
+<div class="table-container">
+
+<table>
+<thead>
+<tr>
+<th>Order ID</th>
+<th>Customer</th>
+<th>Products</th>
+<th>Total</th>
+<th>Payment</th>
+<th>Status</th>
+<th>Date</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="ordersTable"></tbody>
+
+</table>
+</div>
+
+<div class="footer">
+© 2026 Ozone Amanzi | Orders Management System
+</div>
+
+<script>
+
+let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+function save(){
+    localStorage.setItem("orders", JSON.stringify(orders));
+    loadOrders();
+}
+
+function changeStatus(index, status){
+    orders[index].status = status;
+    save();
+}
+
+function deleteOrder(index){
+    orders.splice(index,1);
+    save();
+}
+
+function loadOrders(){
+
+    let pendingCount = 0;
+    let deliveredCount = 0;
+
+    const table = document.getElementById("ordersTable");
+    table.innerHTML = "";
+
+    if(orders.length === 0){
+        table.innerHTML = "<tr><td colspan='5'>No orders found</td></tr>";
+        return;
+    }
+
+    orders.forEach((order, index)=>{
+
+    let statusClass = "pending";
+
+    if(order.status === "Verified") statusClass = "verified";
+    if(order.status === "Delivered") statusClass = "delivered";
+
+    if(order.status === "Pending") pendingCount++;
+    if(order.status === "Delivered") deliveredCount++;
+
+    let products = "";
+
+    if(order.items){
+
+        order.items.forEach(item=>{
+
+            products += `
+                ${item.name}
+                (${item.quantity})<br>
+            `;
+
+        });
+
+    }
+
+    table.innerHTML += `
+
+    <tr>
+
+        <td>${order.id}</td>
+
+        <td>
+            ${order.customer}
+        </td>
+
+        <td>
+            ${products}
+        </td>
+
+        <td>
+            R${order.total}
+        </td>
+
+        <td>
+            ${order.payment}
+        </td>
+
+        <td>
+
+            <span class="status ${statusClass}">
+                ${order.status}
+            </span>
+
+        </td>
+
+        <td>
+            ${order.date}
+        </td>
+
+        <td>
+
+            <button class="verify"
+            onclick="changeStatus(${index},'Verified')">
+            Verify
+            </button>
+
+            <button class="deliver"
+            onclick="changeStatus(${index},'Delivered')">
+            Deliver
+            </button>
+
+            <button class="delete"
+            onclick="deleteOrder(${index})">
+            Delete
+            </button>
+
+        </td>
+
+    </tr>
+
+    `;
+
+    });
+
+    document.getElementById("totalOrders").innerText =
+orders.length;
+
+document.getElementById("pendingOrders").innerText =
+pendingCount;
+
+document.getElementById("deliveredOrders").innerText =
+deliveredCount;
+}
+
+loadOrders();
+
+setInterval(() => {
+
+    orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+    loadOrders();
+
+}, 1000);
+
+</script>
+
+</body>
+</html>

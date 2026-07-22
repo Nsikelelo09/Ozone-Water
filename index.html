@@ -1,216 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ozone Amanzi - Fresh Drinking Water</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+ <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>   
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ozone Amanzi - Fresh Water Delivery</title>
 
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            /* Replace 'water-background.jpg' with your actual local image filename */
-            background-image: url('water-bg.jpg.jpeg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: #fff;
-        }
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-        /* Dark overlay for readability */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            z-index: -1;
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
 
-        header {
-            background-color: rgba(0, 119, 182, 0.85);
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+body{
+    min-height:100vh;
+    color:#fff;
+    background: url('https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg') center/cover no-repeat fixed;
+    position: relative;
+}
 
-        header h1 {
-            font-size: 2rem;
-            letter-spacing: 1px;
-        }
+/* dark overlay */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.65);
+    z-index:-1;
+}
 
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 30px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: 0.3s;
-        }
+/* NAVBAR */
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 60px;
+    background:rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    position:sticky;
+    top:0;
+}
 
-        nav a:hover {
-            text-decoration: underline;
-            color: #ffdd99;
-        }
+header h1{
+    font-size:24px;
+    font-weight:700;
+    letter-spacing:1px;
+    color:#00d4ff;
+}
 
-        .hero {
-            text-align: center;
-            padding: 100px 20px;
-            background-color: rgba(0, 0, 0, 0.4);
-            margin: 50px 20px;
-            border-radius: 20px;
-        }
+nav a{
+    margin-left:20px;
+    text-decoration:none;
+    color:#fff;
+    font-weight:500;
+    transition:0.3s;
+}
 
-        .hero h2 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-        }
+nav a:hover{
+    color:#00d4ff;
+}
 
-        .hero p {
-            font-size: 1.3rem;
-            margin-bottom: 30px;
-        }
+/* HERO */
+.hero{
+    text-align:center;
+    padding:120px 20px;
+}
 
-        .btn {
-            display: inline-block;
-            background-color: #00a8ff;
-            color: white;
-            padding: 12px 30px;
-            text-decoration: none;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 50px;
-            transition: 0.3s;
-        }
+.hero h2{
+    font-size:48px;
+    margin-bottom:10px;
+}
 
-        .btn:hover {
-            background-color: #0077b3;
-            transform: scale(1.05);
-        }
+.hero p{
+    font-size:18px;
+    opacity:0.9;
+    margin-bottom:25px;
+}
 
-        .features {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            flex-wrap: wrap;
-            padding: 40px 20px;
-            margin: 30px 20px;
-        }
+.btn{
+    display:inline-block;
+    padding:12px 28px;
+    background:#00d4ff;
+    color:#000;
+    font-weight:600;
+    border-radius:30px;
+    text-decoration:none;
+    transition:0.3s;
+}
 
-        .card {
-            background-color: rgba(255, 255, 255, 0.9);
-            color: #333;
-            padding: 30px 20px;
-            border-radius: 15px;
-            text-align: center;
-            width: 260px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            transition: 0.3s;
-        }
+.btn:hover{
+    transform:scale(1.05);
+    background:#00aacc;
+}
 
-        .card:hover {
-            transform: translateY(-8px);
-        }
+/* FEATURES */
+.features{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+    gap:20px;
+    padding:60px;
+}
 
-        .card h3 {
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-            color: #0077b3;
-        }
+.card{
+    background:rgba(255,255,255,0.08);
+    padding:25px;
+    border-radius:15px;
+    backdrop-filter: blur(10px);
+    text-align:center;
+    transition:0.3s;
+    border:1px solid rgba(255,255,255,0.1);
+}
 
-        .card p {
-            font-size: 1rem;
-            line-height: 1.4;
-        }
+.card:hover{
+    transform:translateY(-8px);
+    background:rgba(255,255,255,0.12);
+}
 
-        footer {
-            text-align: center;
-            padding: 30px;
-            background-color: rgba(0, 0, 0, 0.7);
-            margin-top: 50px;
-            font-size: 0.9rem;
-        }
+.card h3{
+    color:#00d4ff;
+    margin-bottom:10px;
+}
 
-        .whatsapp-link {
-            display: inline-block;
-            margin-top: 10px;
-            background-color: #25d366;
-            color: white;
-            padding: 8px 18px;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: 0.3s;
-        }
+/* FOOTER */
+footer{
+    text-align:center;
+    padding:20px;
+    background:rgba(0,0,0,0.5);
+    font-size:14px;
+}
 
-        .whatsapp-link:hover {
-            background-color: #128C7E;
-            transform: scale(1.02);
-        }
+/* RESPONSIVE */
+@media(max-width:768px){
+    header{
+        padding:15px 20px;
+        flex-direction:column;
+    }
 
-        @media (max-width: 700px) {
-            header {
-                flex-direction: column;
-                gap: 10px;
-            }
-            nav a {
-                margin: 0 15px;
-            }
-            .hero h2 {
-                font-size: 2rem;
-            }
-        }
-    </style>
+    .hero h2{
+        font-size:32px;
+    }
+
+    .features{
+        padding:30px;
+    }
+
+    /* MAP BUTTON */
+.map-btn{
+    position:fixed;
+    top:20px;
+    right:20px;
+    background:rgba(255,255,255,0.15);
+    border:1px solid rgba(255,255,255,0.25);
+    backdrop-filter:blur(12px);
+    color:white;
+    text-decoration:none;
+    padding:12px 20px;
+    border-radius:30px;
+    font-weight:bold;
+    transition:0.3s;
+    z-index:1000;
+}
+
+.map-btn:hover{
+    background:rgba(255,255,255,0.25);
+    transform:scale(1.05);
+}
+}
+</style>
 </head>
+
 <body>
 
 <header>
     <h1>Ozone Amanzi</h1>
     <nav>
         <a href="index.html">Home</a>
-        <a href="products.html">Menu</a>
+        <a href="product.html">Menu</a>
         <a href="login.html">Login</a>
+        <a href="AboutUs.html">About Us</a>
+        <a href="map.html" class="map-btn">Map</a>
     </nav>
 </header>
 
 <section class="hero">
-    <h2>Fresh & Clean Drinking Water</h2>
-    <p>Healthy water delivered to your doorstep.</p>
-    <!-- Shop Now button links to products page (menu with add to cart) -->
-    <a href="products.html" class="btn">Shop Now</a>
+    <h2>Pure. Clean. Delivered.</h2>
+    <p>Fresh drinking water delivered straight to your doorstep</p>
+    <a class="btn" href="product.html">Shop Now</a>
 </section>
 
 <section class="features">
     <div class="card">
-        <h3>Pure Water</h3>
-        <p>100% purified and healthy, enriched with natural minerals.</p>
+        <h3>💧 Pure Water</h3>
+        <p>Scientifically purified and safe for daily consumption.</p>
     </div>
+
     <div class="card">
-        <h3>Fast Delivery</h3>
-        <p>Quick delivery to your location within 24 hours.</p>
+        <h3>🚚 Fast Delivery</h3>
+        <p>We deliver within hours in your local area.</p>
     </div>
+
     <div class="card">
-        <h3>Affordable</h3>
-        <p>Best prices for quality water, with subscription plans.</p>
+        <h3>💰 Affordable</h3>
+        <p>High quality water at the best possible prices.</p>
     </div>
 </section>
 
 <footer>
-    <p>© 2026 Ozone Amanzi – Fresh Water Delivery</p>
-    <p>📞 Need help? Click below to chat with us on WhatsApp:</p>
-    <!-- WhatsApp link: Replace the phone number with your actual WhatsApp number -->
-    <a href="https://wa.me/27612345678?text=Hello%2C%20I%20want%20to%20order%20water" 
-       class="whatsapp-link" target="_blank">
-       💬 WhatsApp: +27 61 234 5678
-    </a>
+    <p>© 2026 Ozone Amanzi. All rights reserved.</p>
 </footer>
 
 </body>

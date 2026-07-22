@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ozone Amanzi Admin</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    color:white;
+    min-height:100vh;
+
+    background:
+    linear-gradient(
+        rgba(2,6,23,0.85),
+        rgba(15,23,42,0.85)
+    ),
+    url('https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=1920&q=80');
+
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+}
+
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:260px;
+    height:100vh;
+    background:rgba(15,23,42,0.95);
+    backdrop-filter:blur(15px);
+    border-right:1px solid rgba(255,255,255,0.1);
+    padding:25px;
+}
+
+.sidebar h2{
+    color:#38bdf8;
+    margin-bottom:40px;
+    font-size:28px;
+}
+
+.sidebar a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#cbd5e1;
+    text-decoration:none;
+    padding:14px;
+    margin-bottom:10px;
+    border-radius:12px;
+    transition:0.3s;
+}
+
+.sidebar a:hover{
+    background:#38bdf8;
+    color:white;
+    transform:translateX(5px);
+}
+
+/* Main */
+
+.main{
+    margin-left:260px;
+    padding:30px;
+}
+
+/* Header */
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.admin-box{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.avatar{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    background:#38bdf8;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+}
+
+/* Cards */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:25px;
+}
+
+.card{
+    background:rgba(30,41,59,0.7);
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:20px;
+    padding:25px;
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 15px 40px rgba(56,189,248,0.2);
+}
+
+.card h3{
+    color:#94a3b8;
+    margin-bottom:10px;
+}
+
+.card h1{
+    color:#38bdf8;
+    font-size:40px;
+}
+box-shadow:0 8px 30px rgba(0,0,0,0.3);
+
+/* Orders Table */
+
+.orders{
+    margin-top:35px;
+    background:rgba(30,41,59,0.7);
+    backdrop-filter:blur(10px);
+    border-radius:20px;
+    padding:25px;
+    border:1px solid rgba(255,255,255,0.1);
+}
+
+.orders h2{
+    margin-bottom:20px;
+}
+
+box-shadow:0 8px 30px rgba(0,0,0,0.3);
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    color:#94a3b8;
+    text-transform:uppercase;
+    font-size:14px;
+    padding:15px;
+}
+
+td{
+    padding:15px;
+}
+
+tr{
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+tr:hover{
+    background:rgba(255,255,255,0.03);
+}
+
+/* Status */
+
+.status{
+    padding:7px 15px;
+    border-radius:50px;
+    font-size:13px;
+    font-weight:600;
+}
+
+.pending{
+    background:#f59e0b;
+    color:black;
+}
+
+.delivered{
+    background:#22c55e;
+    color:white;
+}
+
+/* Mobile */
+
+@media(max-width:900px){
+
+.sidebar{
+    width:100%;
+    height:auto;
+    position:relative;
+}
+
+.main{
+    margin-left:0;
+}
+
+.cards{
+    grid-template-columns:1fr;
+}
+
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+
+    <h2>💧 Ozone Admin</h2>
+
+    <a href="admin-dashboard.html">Dashboard</a>
+    <a href="admin-orders.html">Orders</a>
+    <a href="admin-payments.html">Payments</a>
+    <a href="admin-customers.html">Customers</a>
+    <a href="admin-products.html">Products</a>
+    <a href="admin-drivers.html">Drivers</a>
+    <a href="login.html">Logout</a>
+
+</div>
+
+<div class="main">
+
+<div class="topbar">
+
+<div>
+<h1>Dashboard</h1>
+<p style="color:#94a3b8;">
+Welcome back, Administrator
+</p>
+</div>
+
+<div class="admin-box">
+<div class="avatar">👤</div>
+
+<div>
+<b>Admin</b><br>
+<small>Ozone Amanzi</small>
+</div>
+
+</div>
+
+</div>
+
+<div class="cards">
+
+    <div class="card">
+        <h3>Total Orders</h3>
+        <h1 id="ordersCount">0</h1>
+    </div>
+
+    <div class="card">
+        <h3>Pending Orders</h3>
+        <h1 id="pendingCount">0</h1>
+    </div>
+
+    <div class="card">
+        <h3>Delivered</h3>
+        <h1 id="deliveredCount">0</h1>
+    </div>
+
+    <div class="card">
+        <h3>Revenue</h3>
+        <h1 id="revenue">R0</h1>
+    </div>
+
+</div>
+
+<div class="orders">
+
+<h2>Recent Orders</h2>
+
+<br>
+
+<table>
+
+<thead>
+<tr>
+<th>Customer</th>
+<th>Status</th>
+<th>Date</th>
+</tr>
+</thead>
+
+<tbody id="ordersTable">
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+const orders =
+JSON.parse(localStorage.getItem("orders")) || [];
+
+document.getElementById("ordersCount").innerText =
+orders.length;
+
+let pending = 0;
+let delivered = 0;
+let revenue = 0;
+
+const table =
+document.getElementById("ordersTable");
+
+orders.forEach(order=>{
+
+if(order.status==="Pending") pending++;
+
+if(order.status==="Delivered") delivered++;
+
+revenue += Number(order.total || 0);
+
+table.innerHTML += `
+<tr>
+<td>${order.customer}</td>
+<td>
+<span class="status ${
+order.status === "Delivered"
+? "delivered"
+: "pending"
+}">
+${order.status}
+</span>
+</td>
+<td>${order.date}</td>
+</tr>
+`;
+
+});
+
+document.getElementById("pendingCount").innerText =
+pending;
+
+document.getElementById("deliveredCount").innerText =
+delivered;
+
+document.getElementById("revenue").innerText =
+"R" + revenue;
+
+</script>
+
+</body>
+</html>

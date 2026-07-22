@@ -1,0 +1,35 @@
+<section class="delivery-map">
+
+    <h2>Track Your Delivery</h2>
+
+    <p>Click below to view your location on Google Maps</p>
+
+    <button onclick="openMap()">Open My Location</button>
+
+</section>
+
+<script>
+function openMap(){
+
+    if(navigator.geolocation){
+
+        navigator.geolocation.getCurrentPosition((position) => {
+
+            let lat = position.coords.latitude;
+            let lng = position.coords.longitude;
+
+            // Open Google Maps (FREE METHOD)
+            let url = `https://www.google.com/maps?q=${lat},${lng}`;
+
+            window.open(url, "_blank");
+
+        },
+        () => {
+            alert("Please allow location access");
+        });
+
+    } else {
+        alert("Geolocation not supported");
+    }
+}
+</script>

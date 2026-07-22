@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <!-- Your local firebase.js must initialize the app -->
+    <script src="firebase.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Order Type</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+            background:
+                linear-gradient(rgba(0, 0, 0, .55), rgba(0, 0, 0, .55)),
+                url('https://images.unsplash.com/photo-1616118132534-381148898bb4?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Floating water drops */
+        body::before {
+            content: "💧";
+            position: absolute;
+            top: 10%;
+            left: 8%;
+            font-size: 120px;
+            opacity: .15;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        body::after {
+            content: "💧";
+            position: absolute;
+            bottom: 10%;
+            right: 8%;
+            font-size: 100px;
+            opacity: .15;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-25px);
+            }
+        }
+
+        .container {
+            text-align: center;
+            max-width: 1100px;
+            width: 90%;
+            padding: 40px;
+            z-index: 2;
+        }
+
+        h1 {
+            font-size: 58px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 5px 25px rgba(0, 0, 0, .5);
+        }
+
+        .container>p {
+            font-size: 18px;
+            opacity: .9;
+            margin-bottom: 50px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, .12);
+            border: 1px solid rgba(255, 255, 255, .25);
+            border-radius: 30px;
+            padding: 45px 25px;
+            cursor: pointer;
+            backdrop-filter: blur(15px);
+            transition: .35s;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .35);
+        }
+
+        .card:hover {
+            transform: translateY(-12px) scale(1.04);
+            background: rgba(255, 255, 255, .2);
+            box-shadow: 0 20px 50px rgba(0, 212, 255, .4);
+        }
+
+        .icon {
+            font-size: 65px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 15px;
+            opacity: .85;
+            margin-bottom: 25px;
+        }
+
+        button {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 15px;
+            background: linear-gradient(135deg, #00d4ff, #38bdf8);
+            color: black;
+            transition: .3s;
+        }
+
+        button:hover {
+            transform: scale(1.08);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, .5);
+        }
+
+        .back {
+            margin-top: 40px;
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            opacity: .8;
+            font-size: 16px;
+        }
+
+        .back:hover {
+            opacity: 1;
+        }
+
+        @media(max-width: 768px) {
+            h1 {
+                font-size: 38px;
+            }
+            .container>p {
+                font-size: 16px;
+            }
+            .card {
+                padding: 35px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Pure Water Delivered Fast</h1>
+        <p>Choose whether you'd like to collect your order from our store
+            or have it delivered directly to your location.</p>
+
+        <div class="options">
+
+            <!-- COLLECTION -->
+            <div class="card" onclick="choose('collection')">
+                <div class="icon">🛒</div>
+                <h2>Collection</h2>
+                <p>Pick up your order from our store</p>
+                <button>Select Collection</button>
+            </div>
+
+            <!-- DELIVERY -->
+            <div class="card" onclick="choose('delivery')">
+                <div class="icon">🚚</div>
+                <h2>Delivery</h2>
+                <p>We deliver straight to your door</p>
+                <button>Select Delivery</button>
+            </div>
+
+        </div>
+
+        <a class="back" href="login.html">← Back to Login</a>
+
+    </div>
+
+    <script>
+        /**
+         * This page uses localStorage only for temporary navigation state (orderType).
+         * All persistent data (orders, cart, users) are stored in Firebase.
+         */
+        function choose(type) {
+            // Save choice temporarily for the next page
+            localStorage.setItem('orderType', type);
+
+            // Route based on selection
+            if (type === 'collection') {
+                window.location.href = 'payment.html';
+            } else if (type === 'delivery') {
+                window.location.href = 'deliviry.html';
+            }
+        }
+
+        // (Optional) If you want to force login before choosing, you could check currentUser.
+        // But the page is accessible after login, so we assume user is logged in.
+    </script>
+
+</body>
+</html>

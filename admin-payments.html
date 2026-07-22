@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Confirmed | Ozone Amanzi</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+/* BACKGROUND */
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    background: url('https://images.pexels.com/photos/416528/pexels-photo-416528.jpeg') center/cover no-repeat fixed;
+}
+
+/* OVERLAY */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background: linear-gradient(135deg, rgba(0,10,25,0.75), rgba(0,0,0,0.8));
+    z-index:-1;
+}
+
+/* MAIN CARD */
+.container{
+    width:100%;
+    max-width:700px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter: blur(15px);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* HEADER */
+.header{
+    text-align:center;
+    padding:40px 25px;
+    background:rgba(22,163,74,0.15);
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.success-icon{
+    font-size:60px;
+    margin-bottom:10px;
+}
+
+.header h1{
+    font-size:26px;
+    margin-bottom:5px;
+}
+
+.header p{
+    opacity:0.85;
+}
+
+/* CONTENT */
+.content{
+    padding:30px;
+}
+
+/* INFO CARD */
+.info-card{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.1);
+    padding:18px;
+    border-radius:14px;
+    margin-bottom:20px;
+}
+
+.info-card p{
+    margin:8px 0;
+    color:#e2e8f0;
+}
+
+/* STEPS */
+.steps h3{
+    margin-bottom:15px;
+    color:#00d4ff;
+}
+
+.step{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.08);
+    padding:14px;
+    border-radius:12px;
+    margin-bottom:10px;
+    color:#e2e8f0;
+    transition:0.3s;
+}
+
+.step:hover{
+    transform:translateX(5px);
+    border-color:#00d4ff;
+}
+
+/* BADGE */
+.badge{
+    display:inline-block;
+    padding:6px 12px;
+    background:#16a34a;
+    color:white;
+    border-radius:20px;
+    font-size:12px;
+    margin-top:10px;
+}
+
+/* NOTE */
+.note{
+    margin-top:20px;
+    background:rgba(249,115,22,0.15);
+    border:1px solid rgba(249,115,22,0.4);
+    padding:15px;
+    border-radius:12px;
+    color:#fdba74;
+    font-size:14px;
+}
+
+/* BUTTON */
+.btn{
+    width:100%;
+    margin-top:25px;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:#00d4ff;
+    color:#001018;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.btn:hover{
+    background:#00aacc;
+    transform:scale(1.02);
+}
+
+/* FOOTER */
+.footer-text{
+    text-align:center;
+    margin-top:15px;
+    font-size:13px;
+    opacity:0.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <div class="success-icon">🎉</div>
+        <h1>Order Confirmed</h1>
+        <p>Your fresh water is being prepared</p>
+        <div class="badge">Cash Payment Selected</div>
+    </div>
+
+    <div class="content">
+
+        <div class="info-card">
+            <p><strong>Payment Method:</strong> Cash</p>
+            <p><strong>Status:</strong> Awaiting Payment</p>
+            <p><strong>Payment Time:</strong> On Delivery / Collection</p>
+        </div>
+
+        <div class="steps">
+            <h3>What Happens Next</h3>
+
+            <div class="step">📦 Your order is now being processed</div>
+            <div class="step">🚚 Delivery team is preparing your order</div>
+            <div class="step">💵 Pay the driver or cashier in cash</div>
+            <div class="step">💧 Enjoy clean purified water</div>
+        </div>
+
+        <div class="note">
+            ⚠ Please ensure you have the correct cash amount ready when your order arrives.
+        </div>
+
+        <button class="btn" onclick="finishCash()">
+            Back to Home
+        </button>
+
+        <p class="footer-text">
+            Thank you for choosing Ozone Amanzi 💧
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+function finishCash(){
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    if(cart.length === 0){
+        alert("Your cart is empty.");
+        return;
+    }
+
+    let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+    let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    let total = 0;
+
+    cart.forEach(item=>{
+        total += item.price * item.quantity;
+    });
+
+    let order = {
+        id: "ORD" + Date.now(),
+        customer: currentUser ? currentUser.name : "Guest",
+        email: currentUser ? currentUser.email : "",
+        items: cart,
+        total: total,
+        payment: "Cash",
+        status: "Pending",
+        date: new Date().toLocaleString()
+    };
+
+    orders.push(order);
+
+    localStorage.setItem("orders", JSON.stringify(orders));
+
+    localStorage.removeItem("cart");
+    localStorage.removeItem("paymentMethod");
+
+    alert("Order placed successfully!");
+
+    window.location.href = "index.html";
+
+}
+
+
+
+</script>
+
+</body>
+</html>
+```

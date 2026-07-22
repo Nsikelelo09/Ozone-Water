@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <!-- Your local firebase.js must initialize the app -->
+    <script src="firebase.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Ozone Amanzi</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: url('https://images.pexels.com/photos/1000084/pexels-photo-1000084.jpeg') center/cover no-repeat fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 15, 30, 0.75), rgba(0, 0, 0, 0.75));
+            z-index: -1;
+        }
+
+        .payment-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 35px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        p {
+            opacity: 0.85;
+            margin-bottom: 25px;
+        }
+
+        .payment-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .payment-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .payment-card:hover {
+            transform: translateY(-5px);
+            border-color: #00ff88;
+        }
+
+        .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            margin-top: 25px;
+            padding: 10px 18px;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .note {
+            font-size: 13px;
+            opacity: 0.7;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="payment-container">
+
+        <h2>Secure Checkout</h2>
+        <p>Select your payment method</p>
+
+        <div class="payment-options">
+            <div class="payment-card" onclick="pay('cash')">
+                <div class="icon">💵</div>
+                <h3>Cash</h3>
+                <p>Pay on delivery or collection</p>
+            </div>
+
+            <div class="payment-card" onclick="pay('eft')">
+                <div class="icon">🏦</div>
+                <h3>EFT</h3>
+                <p>Bank transfer payment</p>
+            </div>
+        </div>
+
+        <button class="back-btn" onclick="history.back()">← Back</button>
+
+        <div class="note">
+            Your selection will be saved before checkout
+        </div>
+
+    </div>
+
+    <script>
+        // ----- LOGIN CHECK (using localStorage for session) -----
+        // We keep this temporary session data in localStorage because it's not persistent order data.
+        // Replace 'loggedIn' with 'currentUser' for a valid session check.
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+        if (!currentUser || !currentUser.name) {
+            // No user logged in – redirect to login page
+            window.location.href = "login.html";
+        }
+
+        // ----- PAYMENT SELECTION -----
+        function pay(method) {
+            // Store payment method temporarily for the next page
+            localStorage.setItem("paymentMethod", method);
+
+            if (method === "cash") {
+                window.location.href = "cash-confirmation.html";
+            } else if (method === "eft") {
+                window.location.href = "eft.html";
+            }
+        }
+
+        // Optional: if the cart is empty, notify the user?
+        // This is just a checkout selection page; cart validation is done later.
+    </script>
+
+</body>
+</html>
