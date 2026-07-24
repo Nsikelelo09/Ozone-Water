@@ -3,7 +3,6 @@
 <head>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <!-- Your local firebase.js must initialize the app -->
     <script src="firebase.js"></script>
 
     <meta charset="UTF-8">
@@ -11,6 +10,7 @@
     <title>Checkout | Ozone Amanzi</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
         * {
@@ -77,6 +77,7 @@
         .payment-card:hover {
             transform: translateY(-5px);
             border-color: #00ff88;
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .icon {
@@ -92,6 +93,7 @@
             color: #fff;
             border-radius: 10px;
             cursor: pointer;
+            transition: 0.3s;
         }
 
         .back-btn:hover {
@@ -120,10 +122,10 @@
                 <p>Pay on delivery or collection</p>
             </div>
 
-            <div class="payment-card" onclick="pay('eft')">
-                <div class="icon">🏦</div>
-                <h3>EFT</h3>
-                <p>Bank transfer payment</p>
+            <div class="payment-card" onclick="pay('card')">
+                <div class="icon">💳</div>
+                <h3>Credit / Debit Card</h3>
+                <p>Secure online card payment</p>
             </div>
         </div>
 
@@ -136,30 +138,51 @@
     </div>
 
     <script>
-        // ----- LOGIN CHECK (using localStorage for session) -----
-        // We keep this temporary session data in localStorage because it's not persistent order data.
-        // Replace 'loggedIn' with 'currentUser' for a valid session check.
         const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
         if (!currentUser || !currentUser.name) {
-            // No user logged in – redirect to login page
             window.location.href = "login.html";
         }
 
-        // ----- PAYMENT SELECTION -----
         function pay(method) {
-            // Store payment method temporarily for the next page
+            // Save payment method
             localStorage.setItem("paymentMethod", method);
 
-            if (method === "cash") {
+            // Generate unique order ID
+            const orderId = 'OZ-' + Date.now().toString().slice(-6) + Math.floor(Math.random() * 1000);
+
+            // Save order to Firebase
+            const paymentData = {
+                orderId: orderId,
+                customerName: currentUser.name,
+                customerEmail: currentUser.email || 'N/A',
+                customerPhone: currentUser.phone || 'N/A',
+                paymentMethod: method,
+                amount: 'R 150.00',
+                status: 'pending',
+                date: new Date().toISOString(),
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            // Save to Firebase Realtime Database
+            const paymentsRef = firebase.database().ref('payments');
+            const newPaymentRef = paymentsRef.push();
+            newPaymentRef.set(paymentData)
+                .then(() => {
+                    console.log('Payment saved to Firebase:', orderId);
+                    localStorage.setItem('orderId', orderId);
+                })
+                .catch((error) => {
+                    console.error('Error saving payment:', error);
+                });
+
+            // Redirect based on method
+            if (method === 'cash') {
                 window.location.href = "cash-confirmation.html";
-            } else if (method === "eft") {
+            } else if (method === 'card') {
                 window.location.href = "eft.html";
             }
         }
-
-        // Optional: if the cart is empty, notify the user?
-        // This is just a checkout selection page; cart validation is done later.
     </script>
 
 </body>

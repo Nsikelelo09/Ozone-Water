@@ -1,143 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<meta charset="UTF-8">
-<title>Login</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<script src="app.js"></script>
-<body>
- <div id="toast"></div>   
-
-<header>
-    <h1>Ozone Amanzi</h1>
-</header>
-
-<div class="login-container">
-    <div class="login-card">
-
-        <h2>Welcome Back</h2>
-        <p class="login-text">Sign in to continue ordering fresh water.</p>
-
-        <form onsubmit="loginUser(event)">
-
-            <div class="input-group">
-                <label>Email Address</label>
-                <input id="email" type="email" placeholder="Enter your email" required>
-            </div>
-
-            <div class="input-group">
-                <label>Password</label>
-                <input id="password" type="password" placeholder="Enter your password" required>
-            </div>
-
-            <button class="btn-login" type="submit">Login</button>
-
-        </form>
-
-        <p class="signup-link">
-            Don't have an account?
-            <a href="signup.html">Create Account</a>
-        </p>
-
-    </div>
-</div>
-
-<script>
-function isValidEmail(email){
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+// When logging in as admin
+function loginUser(email, password) {
+    // ... your existing login code ...
+    
+    // After successful login, check if user is admin
+    const userData = {
+        name: 'Admin User',
+        email: 'admin@ozoneamanzi.co.za',
+        phone: '0812345678',
+        role: 'admin'  // <-- THIS IS IMPORTANT
+    };
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+    
+    // Redirect admin to dashboard
+    if (userData.role === 'admin') {
+        window.location.href = 'admin-payments.html';
+    } else {
+        window.location.href = 'index.html';
+    }
 }
-function loginUser(e){
-    e.preventDefault();
-
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-
-    // ==========================
-    // ADMIN LOGIN
-    // ==========================
-    if(email === "Athandiwe@ozoneamanzi.co.za" && password === "Nsikelelo09"){
-
-        localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("adminLoggedIn", "true");
-
-        showToast("Welcome Admin!", "success");
-
-        setTimeout(() => {
-            window.location.href = "admin-dashboard.html";
-        },1000);
-
-        return;
-    }
-
-    // Validate email format for normal users
-    if(!isValidEmail(email)){
-        showToast(
-            "Please enter a valid email (example: name@gmail.com)",
-            "error"
-        );
-        return;
-    }
-
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-
-    // No account found
-    if(!storedUser){
-        showToast(
-            "No account found. Please sign up first.",
-            "error"
-        );
-        return;
-    }
-
-    // Wrong email
-    if(email !== storedUser.email){
-        showToast(
-            "Email address not found.",
-            "error"
-        );
-        return;
-    }
-
-    // Wrong password
-    if(password !== storedUser.password){
-        showToast(
-            "Incorrect password.",
-            "error"
-        );
-        return;
-    }
-
-    // Normal customer login
-    localStorage.setItem("loggedIn", "true");
-    localStorage.setItem("currentUser", email);
-
-    showToast("Login successful!", "success");
-
-    setTimeout(() => {
-        window.location.href = "order-type.html";
-    },1000);
-}
-
-    function showToast(message, type = "success"){
-    const toast = document.getElementById("toast");
-
-    toast.innerText = message;
-    toast.className = "";
-
-    toast.classList.add("show");
-    toast.classList.add(type);
-
-    setTimeout(() => {
-        toast.classList.remove("show");
-    }, 2500);
-}
-</script>
-
-</body>
-
-</html>
-
-make this look like a real smooth good website

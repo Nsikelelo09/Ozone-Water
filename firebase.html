@@ -1,24 +1,479 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Details | Ozone Amanzi</title>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: url('https://images.pexels.com/photos/1000084/pexels-photo-1000084.jpeg') center/cover no-repeat fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 15, 30, 0.85), rgba(0, 0, 0, 0.85));
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 40px 35px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 550px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .header-icon {
+            text-align: center;
+            font-size: 56px;
+            color: #00e676;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        h2 i {
+            color: #00e676;
+        }
+
+        .subtitle {
+            text-align: center;
+            opacity: 0.7;
+            margin-bottom: 28px;
+            font-size: 14px;
+        }
+
+        /* Firebase Status */
+        .status-bar {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .status-bar .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .status-bar .status-dot.connected {
+            background: #00e676;
+            box-shadow: 0 0 12px rgba(0, 230, 118, 0.4);
+        }
+
+        .status-bar .status-dot.disconnected {
+            background: #ff6b6b;
+            box-shadow: 0 0 12px rgba(255, 107, 107, 0.4);
+        }
+
+        .status-bar .status-text {
+            display: flex;
+            align-items: center;
+        }
+
+        .status-bar .status-text .label {
+            opacity: 0.5;
+            margin-right: 6px;
+        }
+
+        .status-bar .status-text .value {
+            font-weight: 600;
+        }
+
+        /* Bank Cards */
+        .bank-card {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .bank-card:hover {
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .bank-card.highlight {
+            border-left-color: #ffc107;
+        }
+
+        .bank-card .info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bank-card .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.4;
+            font-weight: 600;
+        }
+
+        .bank-card .value {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .bank-card .copy-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bank-card .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .bank-card .copy-btn.copied {
+            background: #00c853;
+            color: #fff;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0, 200, 83, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 200, 83, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .btn-danger {
+            background: rgba(255, 107, 107, 0.15);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 107, 107, 0.25);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #00c853;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: #ff6b6b;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px 18px;
+            }
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+            .bank-card {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .bank-card .copy-btn {
+                align-self: flex-end;
+            }
+            h2 {
+                font-size: 24px;
+            }
+            .header-icon {
+                font-size: 44px;
+            }
+        }
+    </style>
+</head>
+
 <body>
 
-<h2>Firebase Test</h2>
-<button onclick="test()">Send Test Data</button>
+    <div class="container">
 
-<script type="module">
-import { db } from "./firebase.js";
-import { ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        <div class="header-icon">🏦</div>
+        <h2><i class="fas fa-university"></i> Bank Details</h2>
+        <p class="subtitle">Use these details for EFT or wire transfers</p>
 
-window.test = function(){
+        <!-- ===== FIREBASE STATUS ===== -->
+        <div class="status-bar">
+            <div class="status-text">
+                <span class="status-dot disconnected" id="statusDot"></span>
+                <span class="label">Firebase:</span>
+                <span class="value" id="statusText">Connecting...</span>
+            </div>
+            <div id="timestampDisplay" style="font-size: 12px; opacity: 0.4;"></div>
+        </div>
 
-    set(ref(db, "test/message"), {
-        text: "Hello Firebase 🚀",
-        time: Date.now()
-    });
+        <!-- ===== BANK DETAILS ===== -->
+        <div class="bank-card">
+            <div class="info">
+                <span class="label">Bank Name</span>
+                <span class="value">First National Bank (FNB)</span>
+            </div>
+        </div>
 
-    alert("Data sent to Firebase!");
-}
-</script>
+        <div class="bank-card">
+            <div class="info">
+                <span class="label">Account Holder</span>
+                <span class="value">Ozone Amanzi (Pty) Ltd</span>
+            </div>
+        </div>
+
+        <div class="bank-card highlight">
+            <div class="info">
+                <span class="label">Account Number</span>
+                <span class="value" style="color: #00e676;">6281 9254 7890</span>
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard('6281 9254 7890', 'Account number')">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        </div>
+
+        <div class="bank-card">
+            <div class="info">
+                <span class="label">Branch Code</span>
+                <span class="value">255005</span>
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard('255005', 'Branch code')">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        </div>
+
+        <div class="bank-card">
+            <div class="info">
+                <span class="label">Account Type</span>
+                <span class="value">Business Cheque</span>
+            </div>
+        </div>
+
+        <div class="bank-card" style="border-left: 3px solid #ffc107; background: rgba(255, 193, 7, 0.05);">
+            <div class="info">
+                <span class="label">Reference</span>
+                <span class="value" style="color: #ffc107;">
+                    <i class="fas fa-tag"></i> Use your Order ID
+                </span>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <a href="payment.html" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Checkout
+            </a>
+            <a href="index.html" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </div>
+
+        <div style="margin-top: 16px; text-align: center; font-size: 12px; opacity: 0.3;">
+            <i class="fas fa-lock"></i> All transactions are encrypted and secure
+        </div>
+
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle" style="margin-right: 10px;"></i>
+        <span id="toastMessage">Copied to clipboard!</span>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+
+            // Update status to connected
+            document.getElementById('statusDot').className = 'status-dot connected';
+            document.getElementById('statusText').textContent = 'Connected';
+            document.getElementById('statusText').style.color = '#00e676';
+
+            // Show timestamp
+            const now = new Date();
+            document.getElementById('timestampDisplay').textContent =
+                'Last updated: ' + now.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
+
+            const testRef = database.ref('test_connection');
+            testRef.set({
+                message: 'Bank details page loaded',
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                userAgent: navigator.userAgent
+            })
+            .then(() => {
+                console.log('✅ Firebase connection test successful!');
+            })
+            .catch((error) => {
+                console.error('❌ Firebase write failed:', error);
+                document.getElementById('statusText').textContent = 'Read-only mode';
+                document.getElementById('statusText').style.color = '#ffc107';
+            });
+
+            const bankRef = database.ref('admin/bank_details');
+            bankRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    console.log('Bank details updated from Firebase:', data);
+                }
+            });
+
+        } catch (error) {
+            console.error('❌ Firebase initialization failed:', error);
+            document.getElementById('statusDot').className = 'status-dot disconnected';
+            document.getElementById('statusText').textContent = 'Disconnected';
+            document.getElementById('statusText').style.color = '#ff6b6b';
+        }
+
+        function copyToClipboard(text, label) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                const toastMsg = document.getElementById('toastMessage');
+                toastMsg.textContent = `${label} copied to clipboard!`;
+                toast.classList.add('show');
+                toast.classList.remove('error');
+
+                const buttons = document.querySelectorAll('.copy-btn');
+                buttons.forEach(btn => {
+                    if (btn.textContent.includes('Copy')) {
+                        btn.classList.add('copied');
+                        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        setTimeout(() => {
+                            btn.classList.remove('copied');
+                            btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                        }, 2000);
+                    }
+                });
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }).catch(() => {
+                const toast = document.getElementById('toast');
+                const toastMsg = document.getElementById('toastMessage');
+                toastMsg.textContent = 'Please copy manually: ' + text;
+                toast.classList.add('show');
+                toast.classList.add('error');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 4000);
+            });
+        }
+
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('timestampDisplay').textContent =
+                'Last updated: ' + now.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
+        }, 30000);
+
+        console.log('🏦 Bank details page loaded successfully.');
+    </script>
 
 </body>
 </html>

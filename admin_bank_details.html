@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Details | Ozone Amanzi</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: url('https://images.pexels.com/photos/1000084/pexels-photo-1000084.jpeg') center/cover no-repeat fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 15, 30, 0.85), rgba(0, 0, 0, 0.85));
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 40px 35px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        h2 i {
+            color: #00e676;
+        }
+
+        .subtitle {
+            text-align: center;
+            opacity: 0.7;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .bank-card {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bank-card .label {
+            font-size: 13px;
+            opacity: 0.5;
+        }
+
+        .bank-card .value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .bank-card .copy-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+
+        .bank-card .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .back-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00c853;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: 999;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2><i class="fas fa-university"></i> Bank Details</h2>
+        <p class="subtitle">Use these details for EFT payments</p>
+
+        <div class="bank-card">
+            <div>
+                <div class="label">Bank Name</div>
+                <div class="value">Capitec Bank</div>
+            </div>
+        </div>
+
+        <div class="bank-card">
+            <div>
+                <div class="label">Account Holder</div>
+                <div class="value">Athandiwe Mfihlelwa</div>
+            </div>
+        </div>
+
+        <div class="bank-card">
+            <div>
+                <div class="label">Account Number</div>
+                <div class="value">2232521814</div>
+            </div>
+            <button class="copy-btn" onclick="copyText('6281 9254 7890', 'Account number')">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        </div>
+
+        <div class="bank-card">
+            <div>
+                <div class="label">Branch Code</div>
+                <div class="value">470010</div>
+            </div>
+            <button class="copy-btn" onclick="copyText('255005', 'Branch code')">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        </div>
+
+        <div class="bank-card">
+            <div>
+                <div class="label">Account Type</div>
+                <div class="value">Saving Account</div>
+            </div>
+        </div>
+
+        <div class="bank-card" style="border-left: 3px solid #ffc107;">
+            <div>
+                <div class="label">Reference</div>
+                <div class="value" style="color: #ffc107;">Use your Order ID</div>
+            </div>
+        </div>
+
+        <a href="payment.html" class="back-btn">← Back to Checkout</a>
+    </div>
+
+    <div class="toast" id="toast">Copied to clipboard!</div>
+
+    <script>
+        function copyText(text, label) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.textContent = `${label} copied to clipboard!`;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2500);
+            });
+        }
+    </script>
+
+</body>
+</html>

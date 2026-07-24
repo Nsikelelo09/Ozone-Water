@@ -1,343 +1,102 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <!-- Your local firebase.js must initialize the app -->
-    <script src="firebase.js"></script>
+// ===== PROCESS CARD PAYMENT =====
+function processCardPayment(e) {
+    e.preventDefault();
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EFT Payment | Ozone Amanzi</title>
+    const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+    const expiry = document.getElementById('expiry').value;
+    const cvv = document.getElementById('cvv').value;
+    const cardholder = document.getElementById('cardholder').value.trim();
+    const payBtn = document.getElementById('payBtn');
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    let isValid = true;
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+    // Validate Card Number
+    if (cardNumber.length < 16) {
+        document.getElementById('cardError').classList.add('show');
+        isValid = false;
+    }
+
+    // Validate Expiry
+    if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+        document.getElementById('expiryError').classList.add('show');
+        isValid = false;
+    } else {
+        const [month, year] = expiry.split('/');
+        const now = new Date();
+        const expYear = 2000 + parseInt(year);
+        const expMonth = parseInt(month) - 1;
+        const expDate = new Date(expYear, expMonth, 1);
+        if (expDate < now) {
+            document.getElementById('expiryError').textContent = 'This card has expired';
+            document.getElementById('expiryError').classList.add('show');
+            isValid = false;
         }
+    }
 
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            background: url('https://images.pexels.com/photos/259027/pexels-photo-259027.jpeg') center/cover no-repeat fixed;
-        }
+    // Validate CVV
+    if (cvv.length < 3 || cvv.length > 4) {
+        document.getElementById('cvvError').classList.add('show');
+        isValid = false;
+    }
 
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(0, 10, 30, 0.75), rgba(0, 0, 0, 0.85));
-            z-index: -1;
-        }
+    // Validate Cardholder Name
+    if (cardholder.length < 2) {
+        document.getElementById('nameError').classList.add('show');
+        isValid = false;
+    }
 
-        .container {
-            width: 100%;
-            max-width: 850px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
-        }
+    if (!isValid) {
+        return;
+    }
 
-        .header {
-            text-align: center;
-            padding: 30px;
-            background: rgba(37, 99, 235, 0.15);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    // Get current user
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-        .header h1 {
-            font-size: 26px;
-            margin-bottom: 5px;
-        }
+    // Generate order ID
+    const orderId = 'OZ-' + Date.now().toString().slice(-6) + Math.floor(Math.random() * 1000);
 
-        .header p {
-            opacity: 0.85;
-        }
+    // Prepare payment data
+    const paymentData = {
+        orderId: orderId,
+        customerName: currentUser ? currentUser.name : 'Unknown',
+        customerEmail: currentUser ? currentUser.email || 'N/A' : 'N/A',
+        customerPhone: currentUser ? currentUser.phone || 'N/A' : 'N/A',
+        paymentMethod: 'card',
+        cardLastFour: cardNumber.slice(-4),
+        cardType: detectCardType(cardNumber) || 'Unknown',
+        cardholderName: cardholder,
+        amount: 'R 150.00',
+        status: 'completed',
+        date: new Date().toISOString(),
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
 
-        .content {
-            padding: 30px;
-        }
+    // Show processing state
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    payBtn.disabled = true;
 
-        .bank-box {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 14px;
-            margin-bottom: 25px;
-        }
+    // Save to Firebase
+    const paymentsRef = firebase.database().ref('payments');
+    const newPaymentRef = paymentsRef.push();
 
-        .bank-box h3 {
-            color: #00d4ff;
-            margin-bottom: 12px;
-        }
+    newPaymentRef.set(paymentData)
+        .then(() => {
+            console.log('Card payment saved to Firebase:', orderId);
+            localStorage.setItem('orderId', orderId);
+            localStorage.setItem('paymentStatus', 'success');
+            localStorage.setItem('paymentAmount', 'R 150.00');
+            localStorage.setItem('cardLastFour', cardNumber.slice(-4));
+            localStorage.setItem('cardholderName', cardholder);
 
-        .bank-box p {
-            margin: 6px 0;
-            color: #e2e8f0;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            color: #cbd5e1;
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-            outline: none;
-        }
-
-        input::placeholder {
-            color: #94a3b8;
-        }
-
-        .upload-box {
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .payment-summary {
-            margin-top: 20px;
-            padding: 18px;
-            border-radius: 14px;
-            background: rgba(0, 212, 255, 0.08);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-        }
-
-        .payment-summary h3 {
-            margin-bottom: 10px;
-            color: #00d4ff;
-        }
-
-        .payment-summary p {
-            color: #e2e8f0;
-            margin: 5px 0;
-        }
-
-        .btn {
-            width: 100%;
-            margin-top: 25px;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            background: #00d4ff;
-            color: #001018;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn:hover {
-            background: #00aacc;
-            transform: scale(1.02);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .note {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 13px;
-            opacity: 0.7;
-        }
-
-        #statusMsg {
-            text-align: center;
-            margin-top: 10px;
-            font-weight: 600;
-            color: #facc15;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container">
-
-        <div class="header">
-            <h1>🏦 Secure EFT Payment</h1>
-            <p>Complete your transfer and submit proof of payment</p>
-        </div>
-
-        <div class="content">
-
-            <div class="bank-box">
-                <h3>Bank Details</h3>
-                <p><strong>Bank:</strong> Example Bank</p>
-                <p><strong>Account:</strong> Ozone Amanzi</p>
-                <p><strong>Number:</strong> 123456789</p>
-                <p><strong>Branch:</strong> 250655</p>
-                <p><strong>Reference:</strong> OZONE + Your Name</p>
-            </div>
-
-            <div class="form-group">
-                <label>Full Name</label>
-                <input id="name" placeholder="Enter your full name">
-            </div>
-
-            <div class="form-group">
-                <label>Bank Name</label>
-                <input id="bank" placeholder="e.g. FNB, Capitec">
-            </div>
-
-            <div class="form-group">
-                <label>Account Number</label>
-                <input id="acc" placeholder="Account number">
-            </div>
-
-            <div class="form-group">
-                <label>Payment Status</label>
-                <select id="proof">
-                    <option value="">Select</option>
-                    <option value="yes">I have paid</option>
-                    <option value="no">Not yet paid</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Upload Proof</label>
-                <div class="upload-box">
-                    <input type="file" id="pop">
-                </div>
-            </div>
-
-            <div class="payment-summary">
-                <h3>Steps</h3>
-                <p>1. Send EFT to bank details above</p>
-                <p>2. Use your name as reference</p>
-                <p>3. Upload proof of payment</p>
-                <p>4. Submit for verification</p>
-            </div>
-
-            <button class="btn" id="submitBtn" onclick="submitEFT()">
-                Submit Payment
-            </button>
-
-            <div id="statusMsg"></div>
-
-            <p class="note">
-                Your order will be processed after verification
-            </p>
-
-        </div>
-
-    </div>
-
-    <script>
-        // Firebase reference
-        const ordersRef = firebase.database().ref('orders');
-
-        async function submitEFT() {
-            const name = document.getElementById("name").value.trim();
-            const bank = document.getElementById("bank").value.trim();
-            const acc = document.getElementById("acc").value.trim();
-            const proof = document.getElementById("proof").value;
-            const btn = document.getElementById("submitBtn");
-            const statusMsg = document.getElementById("statusMsg");
-
-            // Validation
-            if (!name || !bank || !acc || !proof) {
-                statusMsg.innerText = "⚠️ Please complete all fields";
-                statusMsg.style.color = "#ef4444";
-                return;
-            }
-
-            if (proof !== "yes") {
-                statusMsg.innerText = "⚠️ Please complete payment first.";
-                statusMsg.style.color = "#ef4444";
-                return;
-            }
-
-            // Get cart from localStorage
-            const cart = JSON.parse(localStorage.getItem("cart")) || [];
-            if (cart.length === 0) {
-                statusMsg.innerText = "⚠️ Your cart is empty. Please add items first.";
-                statusMsg.style.color = "#ef4444";
-                return;
-            }
-
-            // Calculate total
-            let total = 0;
-            cart.forEach(item => {
-                total += item.price * item.quantity;
-            });
-
-            // Create order object
-            const order = {
-                customer: name,
-                items: cart,
-                total: total,
-                payment: "EFT",
-                status: "Pending",
-                date: new Date().toLocaleString(),
-                bank: bank,
-                account: acc,
-                // We'll keep id as a property, but Firebase will generate its own key
-                // For compatibility with existing admin pages, we can store the generated key as id later.
-            };
-
-            // Disable button and show loading
-            btn.disabled = true;
-            btn.innerText = "Submitting...";
-            statusMsg.innerText = "⏳ Saving order...";
-            statusMsg.style.color = "#facc15";
-
-            try {
-                // Push order to Firebase
-                const newRef = await ordersRef.push(order);
-                // Optionally, we could update the order with the generated key as 'id'
-                await newRef.update({ id: newRef.key });
-
-                // Clear cart and related localStorage items
-                localStorage.removeItem("cart");
-                localStorage.removeItem("paymentMethod");
-
-                statusMsg.innerText = "✅ Payment submitted successfully!";
-                statusMsg.style.color = "#22c55e";
-
-                // Redirect after a short delay
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 1500);
-
-            } catch (error) {
-                console.error("Error saving order:", error);
-                statusMsg.innerText = "❌ Failed to submit payment. Please try again.";
-                statusMsg.style.color = "#ef4444";
-                btn.disabled = false;
-                btn.innerText = "Submit Payment";
-            }
-        }
-    </script>
-
-</body>
-</html>
+            // Redirect to confirmation
+            setTimeout(() => {
+                window.location.href = 'cash-confirmation.html';
+            }, 500);
+        })
+        .catch((error) => {
+            console.error('Error saving payment:', error);
+            alert('There was an error processing your payment. Please try again.');
+            payBtn.innerHTML = '<i class="fas fa-lock" style="margin-right:8px;"></i> Pay Now';
+            payBtn.disabled = false;
+        });
+}

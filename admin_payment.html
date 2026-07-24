@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="firebase.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Payments</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0b1a2e;
+            color: #fff;
+            padding: 30px;
+        }
+
+        .dashboard-container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .header h1 i {
+            color: #00e676;
+            margin-right: 10px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-right .admin-badge {
+            background: rgba(0, 230, 118, 0.15);
+            color: #00e676;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 20px 24px;
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00e676;
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            opacity: 0.6;
+            margin-top: 4px;
+        }
+
+        /* Bank Details Section */
+        .bank-details-section {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .bank-details-section h3 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #00e676;
+        }
+
+        .bank-details-section h3 i {
+            margin-right: 10px;
+        }
+
+        .bank-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .bank-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bank-item .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.4;
+        }
+
+        .bank-item .value {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* Payments Table */
+        .payments-table-wrapper {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .table-header h3 {
+            font-size: 18px;
+        }
+
+        .table-header .count {
+            font-size: 13px;
+            opacity: 0.5;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            padding: 0 4px 4px 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        th {
+            text-align: left;
+            padding: 14px 18px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.5;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        td {
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .status-badge {
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+        }
+
+        .status-completed {
+            background: rgba(0, 230, 118, 0.15);
+            color: #00e676;
+        }
+
+        .status-failed {
+            background: rgba(255, 107, 107, 0.15);
+            color: #ff6b6b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.5;
+        }
+
+        .loading i {
+            font-size: 32px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 22px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .bank-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            th,
+            td {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .bank-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+
+        <!-- ===== HEADER ===== -->
+        <header class="header">
+            <h1><i class="fas fa-chart-line"></i> Payment Dashboard</h1>
+            <div class="header-right">
+                <span class="admin-badge"><i class="fas fa-user-shield"></i> Admin</span>
+                <button class="refresh-btn" onclick="loadPayments()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- ===== ADMIN BANK DETAILS ===== -->
+        <div class="bank-details-section">
+            <h3><i class="fas fa-university"></i> Admin Bank Details</h3>
+            <div class="bank-grid">
+                <div class="bank-item">
+                    <span class="label">Bank Name</span>
+                    <span class="value">First National Bank (FNB)</span>
+                </div>
+                <div class="bank-item">
+                    <span class="label">Account Holder</span>
+                    <span class="value">Ozone Amanzi (Pty) Ltd</span>
+                </div>
+                <div class="bank-item">
+                    <span class="label">Account Number</span>
+                    <span class="value">6281 9254 7890</span>
+                </div>
+                <div class="bank-item">
+                    <span class="label">Branch Code</span>
+                    <span class="value">255005</span>
+                </div>
+                <div class="bank-item">
+                    <span class="label">Account Type</span>
+                    <span class="value">Business Cheque</span>
+                </div>
+                <div class="bank-item">
+                    <span class="label">Reference</span>
+                    <span class="value" style="color: #ffc107;">Use Order ID as reference</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== STATS ===== -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="number" id="totalPayments">0</div>
+                <div class="label">Total Payments</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalAmount">R 0</div>
+                <div class="label">Total Revenue</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="pendingCount">0</div>
+                <div class="label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="completedCount">0</div>
+                <div class="label">Completed</div>
+            </div>
+        </div>
+
+        <!-- ===== PAYMENTS TABLE ===== -->
+        <div class="payments-table-wrapper">
+            <div class="table-header">
+                <h3><i class="fas fa-list"></i> Recent Payments</h3>
+                <span class="count" id="paymentCount">0 payments</span>
+            </div>
+            <div class="table-scroll">
+                <div id="paymentsContainer">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Loading payments...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ===== LOGOUT =====
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+
+        // ===== LOAD PAYMENTS =====
+        function loadPayments() {
+            const container = document.getElementById('paymentsContainer');
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Loading payments...</p>
+                </div>
+            `;
+
+            const paymentsRef = firebase.database().ref('payments');
+            paymentsRef.orderByChild('timestamp').limitToLast(50).on('value', (snapshot) => {
+                const payments = [];
+                let totalAmount = 0;
+                let pending = 0;
+                let completed = 0;
+
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    data.id = childSnapshot.key;
+                    payments.push(data);
+
+                    // Calculate stats
+                    const amount = parseFloat(data.amount.replace(/[^0-9.]/g, ''));
+                    if (!isNaN(amount)) totalAmount += amount;
+
+                    if (data.status === 'pending') pending++;
+                    if (data.status === 'completed') completed++;
+                });
+
+                // Sort by date (newest first)
+                payments.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Update stats
+                document.getElementById('totalPayments').textContent = payments.length;
+                document.getElementById('totalAmount').textContent = 'R ' + totalAmount.toFixed(2);
+                document.getElementById('pendingCount').textContent = pending;
+                document.getElementById('completedCount').textContent = completed;
+                document.getElementById('paymentCount').textContent = payments.length + ' payments';
+
+                // Render table
+                if (payments.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No payments received yet</p>
+                            <p style="font-size: 13px; opacity: 0.5;">Payments will appear here when customers place orders</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Method</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                payments.forEach((payment) => {
+                    const statusClass = payment.status === 'completed' ? 'status-completed' :
+                        payment.status === 'pending' ? 'status-pending' : 'status-failed';
+                    const methodIcon = payment.paymentMethod === 'card' ? '💳' : '💵';
+                    const methodText = payment.paymentMethod === 'card' ?
+                        'Card ' + (payment.cardLastFour ? '•••• ' + payment.cardLastFour : '') :
+                        'Cash';
+
+                    const date = new Date(payment.date);
+                    const formattedDate = date.toLocaleDateString('en-ZA', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    }) + ' ' + date.toLocaleTimeString('en-ZA', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    html += `
+                        <tr>
+                            <td><strong>${payment.orderId || 'N/A'}</strong></td>
+                            <td>${payment.customerName || 'Unknown'}</td>
+                            <td>${methodIcon} ${methodText}</td>
+                            <td>${payment.amount || 'R 0.00'}</td>
+                            <td><span class="status-badge ${statusClass}">${payment.status || 'pending'}</span></td>
+                            <td style="font-size: 12px; opacity: 0.7;">${formattedDate}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        </tbody>
+                    </table>
+                `;
+
+                container.innerHTML = html;
+
+            }, (error) => {
+                console.error('Error loading payments:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle" style="color: #ff6b6b;"></i>
+                        <p>Error loading payments</p>
+                        <p style="font-size: 13px; opacity: 0.5;">${error.message}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // ===== ADMIN CHECK =====
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser || currentUser.role !== 'admin') {
+            window.location.href = 'login.html';
+        }
+
+        // ===== LOAD ON PAGE LOAD =====
+        document.addEventListener('DOMContentLoaded', loadPayments);
+    </script>
+
+</body>
+</html>

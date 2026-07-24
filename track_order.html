@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Track Your Order | Ozone Amanzi</title>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: url('https://images.pexels.com/photos/1000084/pexels-photo-1000084.jpeg') center/cover no-repeat fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            padding: 20px;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 15, 30, 0.85), rgba(0, 0, 0, 0.85));
+            z-index: -1;
+        }
+
+        .track-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 35px 30px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 {
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        h2 i {
+            color: #00e676;
+        }
+
+        .subtitle {
+            text-align: center;
+            opacity: 0.7;
+            margin-bottom: 28px;
+            font-size: 14px;
+        }
+
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+
+        .search-form .input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-form input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+            min-width: 180px;
+        }
+
+        .search-form input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        .search-form input:focus {
+            border-color: #00e676;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.15);
+        }
+
+        .search-form .btn-search {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .search-form .btn-search:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 200, 83, 0.35);
+        }
+
+        .search-form .btn-search:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .search-form .or-divider {
+            text-align: center;
+            opacity: 0.4;
+            font-size: 13px;
+            padding: 4px 0;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px 0;
+            opacity: 0.6;
+        }
+
+        .loading i {
+            font-size: 36px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Order Card */
+        .order-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .order-header .order-id {
+            font-size: 20px;
+            font-weight: 700;
+            color: #00e676;
+        }
+
+        .order-header .order-date {
+            font-size: 13px;
+            opacity: 0.5;
+        }
+
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .order-row:last-child {
+            border-bottom: none;
+        }
+
+        .order-row .label {
+            opacity: 0.5;
+            font-size: 14px;
+        }
+
+        .order-row .value {
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .status-timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0 10px;
+            position: relative;
+            padding: 0 6px;
+        }
+
+        .status-timeline::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 12%;
+            right: 12%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+
+        .status-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .status-step .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: 0.4s;
+        }
+
+        .status-step.active .step-icon {
+            background: #00e676;
+            border-color: #00e676;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
+        }
+
+        .status-step.completed .step-icon {
+            background: #00c853;
+            border-color: #00c853;
+            color: #fff;
+        }
+
+        .status-step .step-label {
+            font-size: 11px;
+            margin-top: 6px;
+            opacity: 0.4;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status-step.active .step-label,
+        .status-step.completed .step-label {
+            opacity: 0.9;
+        }
+
+        .status-step.completed .step-label {
+            color: #00e676;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.6;
+        }
+
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Back button */
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #ff6b6b;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #00c853;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .track-container {
+                padding: 25px 18px;
+            }
+            .search-form .input-group {
+                flex-direction: column;
+            }
+            .search-form .btn-search {
+                width: 100%;
+                justify-content: center;
+            }
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .status-timeline {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 6px;
+            }
+            .status-step .step-label {
+                font-size: 10px;
+            }
+            .status-step .step-icon {
+                width: 34px;
+                height: 34px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="track-container">
+
+        <h2><i class="fas fa-truck"></i> Track Your Order</h2>
+        <p class="subtitle">Enter your Order ID or Email to view status</p>
+
+        <form class="search-form" id="trackForm" onsubmit="trackOrder(event)">
+            <div class="input-group">
+                <input type="text" id="searchInput" placeholder="Order ID (e.g. OZ-123456)" />
+                <button class="btn-search" type="submit" id="searchBtn">
+                    <i class="fas fa-search"></i> Track
+                </button>
+            </div>
+            <div class="or-divider">— OR —</div>
+            <div class="input-group">
+                <input type="email" id="emailInput" placeholder="Your Email Address" />
+                <button class="btn-search" type="button" onclick="trackByEmail()">
+                    <i class="fas fa-envelope"></i> Find My Orders
+                </button>
+            </div>
+        </form>
+
+        <div id="resultArea">
+        </div>
+
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-exclamation-circle" style="margin-right:10px;"></i>
+        <span id="toastMessage">Something went wrong.</span>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const resultArea = document.getElementById('resultArea');
+        const searchInput = document.getElementById('searchInput');
+        const emailInput = document.getElementById('emailInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMessage');
+        let toastTimeout = null;
+
+        function showToast(msg, isSuccess = false) {
+            toastMsg.textContent = msg;
+            toast.className = 'toast show' + (isSuccess ? ' success' : '');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        function trackOrder(e) {
+            e.preventDefault();
+            const orderId = searchInput.value.trim();
+            if (!orderId) {
+                showToast('⚠️ Please enter an Order ID.');
+                return;
+            }
+
+            resultArea.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Searching for order...</p>
+                </div>
+            `;
+
+            const paymentsRef = database.ref('payments');
+            paymentsRef.orderByChild('orderId').equalTo(orderId).once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    if (!data) {
+                        resultArea.innerHTML = `
+                            <div class="no-results">
+                                <i class="fas fa-search"></i>
+                                <p>No order found with ID <strong>${orderId}</strong></p>
+                                <p style="font-size:13px; opacity:0.5;">Please check the ID and try again.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let order = null;
+                    let key = null;
+                    snapshot.forEach((childSnapshot) => {
+                        order = childSnapshot.val();
+                        key = childSnapshot.key;
+                        return true; 
+                    });
+
+                    displayOrder(order, key);
+                })
+                .catch((error) => {
+                    console.error('Error fetching order:', error);
+                    resultArea.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-exclamation-triangle" style="color:#ff6b6b;"></i>
+                            <p>Error searching for order.</p>
+                            <p style="font-size:13px; opacity:0.5;">${error.message}</p>
+                        </div>
+                    `;
+                    showToast('❌ Error connecting to database.');
+                });
+        }
+
+        function trackByEmail() {
+            const email = emailInput.value.trim();
+            if (!email) {
+                showToast('⚠️ Please enter your email address.');
+                return;
+            }
+
+            resultArea.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Searching for orders...</p>
+                </div>
+            `;
+
+            const paymentsRef = database.ref('payments');
+            paymentsRef.orderByChild('customerEmail').equalTo(email).once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    if (!data) {
+                        resultArea.innerHTML = `
+                            <div class="no-results">
+                                <i class="fas fa-inbox"></i>
+                                <p>No orders found for <strong>${email}</strong></p>
+                                <p style="font-size:13px; opacity:0.5;">You haven't placed any orders yet.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let orders = [];
+                    snapshot.forEach((childSnapshot) => {
+                        const order = childSnapshot.val();
+                        order.key = childSnapshot.key;
+                        orders.push(order);
+                    });
+
+                    orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    displayMultipleOrders(orders, email);
+                })
+                .catch((error) => {
+                    console.error('Error fetching orders:', error);
+                    resultArea.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-exclamation-triangle" style="color:#ff6b6b;"></i>
+                            <p>Error searching for orders.</p>
+                            <p style="font-size:13px; opacity:0.5;">${error.message}</p>
+                        </div>
+                    `;
+                    showToast('❌ Error connecting to database.');
+                });
+        }
+
+        function displayOrder(order, key) {
+            const status = order.status || 'pending';
+            const method = order.paymentMethod || 'unknown';
+            const methodIcon = method === 'card' ? '💳' : '💵';
+            const methodLabel = method === 'card' ?
+                'Card (•••• ' + (order.cardLastFour || '') + ')' :
+                'Cash';
+
+            let deliveryStatus = order.deliveryStatus || 'pending';
+            if (status === 'completed' && deliveryStatus === 'pending') {
+                deliveryStatus = 'dispatched'; // auto-upgrade
+            }
+
+            const steps = [
+                { label: 'Order Placed', icon: 'fa-clipboard-list' },
+                { label: 'Payment Confirmed', icon: 'fa-check-circle' },
+                { label: 'Dispatched', icon: 'fa-truck' },
+                { label: 'Delivered', icon: 'fa-home' }
+            ];
+
+            let activeStep = 0;
+            if (deliveryStatus === 'pending') activeStep = 0;
+            else if (deliveryStatus === 'dispatched') activeStep = 2;
+            else if (deliveryStatus === 'delivered') activeStep = 3;
+            if (status === 'completed' && deliveryStatus === 'pending') activeStep = 1;
+
+            const date = new Date(order.date);
+            const formattedDate = date.toLocaleDateString('en-ZA', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }) + ' at ' + date.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
+
+            let html = `
+                <div class="order-card">
+                    <div class="order-header">
+                        <span class="order-id"><i class="fas fa-tag"></i> ${order.orderId || 'N/A'}</span>
+                        <span class="order-date"><i class="far fa-calendar-alt"></i> ${formattedDate}</span>
+                    </div>
+
+                    <div class="order-row">
+                        <span class="label">Customer</span>
+                        <span class="value">${order.customerName || 'Unknown'}</span>
+                    </div>
+                    <div class="order-row">
+                        <span class="label">Email</span>
+                        <span class="value">${order.customerEmail || 'N/A'}</span>
+                    </div>
+                    <div class="order-row">
+                        <span class="label">Payment Method</span>
+                        <span class="value">${methodIcon} ${methodLabel}</span>
+                    </div>
+                    <div class="order-row">
+                        <span class="label">Amount</span>
+                        <span class="value" style="color:#00e676; font-weight:700;">${order.amount || 'R 0.00'}</span>
+                    </div>
+                    <div class="order-row">
+                        <span class="label">Payment Status</span>
+                        <span class="value">
+                            <span class="status-badge" style="
+                                background: ${status === 'completed' ? 'rgba(0,230,118,0.15)' : 'rgba(255,193,7,0.15)'};
+                                color: ${status === 'completed' ? '#00e676' : '#ffc107'};
+                                padding: 4px 14px;
+                                border-radius: 20px;
+                                font-size: 13px;
+                                font-weight: 600;
+                            ">${status.toUpperCase()}</span>
+                        </span>
+                    </div>
+                    <div class="order-row">
+                        <span class="label">Delivery Status</span>
+                        <span class="value">
+                            <span class="status-badge" style="
+                                background: ${deliveryStatus === 'delivered' ? 'rgba(0,230,118,0.15)' :
+                                    deliveryStatus === 'dispatched' ? 'rgba(0,176,255,0.15)' :
+                                    'rgba(255,193,7,0.15)'};
+                                color: ${deliveryStatus === 'delivered' ? '#00e676' :
+                                    deliveryStatus === 'dispatched' ? '#00b0ff' :
+                                    '#ffc107'};
+                                padding: 4px 14px;
+                                border-radius: 20px;
+                                font-size: 13px;
+                                font-weight: 600;
+                            ">${deliveryStatus.toUpperCase()}</span>
+                        </span>
+                    </div>
+
+                    <!-- STATUS TIMELINE -->
+                    <div class="status-timeline">
+            `;
+
+            steps.forEach((step, index) => {
+                let stepClass = '';
+                if (index < activeStep) stepClass = 'completed';
+                else if (index === activeStep) stepClass = 'active';
+
+                html += `
+                    <div class="status-step ${stepClass}">
+                        <div class="step-icon"><i class="fas ${step.icon}"></i></div>
+                        <span class="step-label">${step.label}</span>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+                <p style="text-align:center; margin-top:14px; font-size:13px; opacity:0.4;">
+                    <i class="fas fa-info-circle"></i> Last updated: ${new Date().toLocaleString()}
+                </p>
+            `;
+
+            resultArea.innerHTML = html;
+        }
+
+        function displayMultipleOrders(orders, email) {
+            let html = `
+                <div style="margin-bottom:16px;">
+                    <p style="font-weight:600; color:#00e676;">
+                        <i class="fas fa-user"></i> Found ${orders.length} order(s) for ${email}
+                    </p>
+                </div>
+            `;
+
+            orders.forEach((order, index) => {
+                const status = order.status || 'pending';
+                const method = order.paymentMethod || 'unknown';
+                const methodIcon = method === 'card' ? '💳' : '💵';
+                const date = new Date(order.date);
+                const formattedDate = date.toLocaleDateString('en-ZA', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+
+                html += `
+                    <div class="order-card" style="margin-bottom:16px; cursor:pointer;" 
+                         onclick="displayOrder(${JSON.stringify(order).replace(/"/g, '&quot;')}, '${order.key}')">
+                        <div class="order-header">
+                            <span class="order-id" style="font-size:18px;">${order.orderId || 'N/A'}</span>
+                            <span class="order-date">${formattedDate}</span>
+                        </div>
+                        <div class="order-row">
+                            <span class="label">Amount</span>
+                            <span class="value" style="color:#00e676; font-weight:600;">${order.amount || 'R 0.00'}</span>
+                        </div>
+                        <div class="order-row">
+                            <span class="label">Payment</span>
+                            <span class="value">${methodIcon} ${method.toUpperCase()}</span>
+                        </div>
+                        <div class="order-row">
+                            <span class="label">Status</span>
+                            <span class="value">
+                                <span class="status-badge" style="
+                                    background: ${status === 'completed' ? 'rgba(0,230,118,0.15)' : 'rgba(255,193,7,0.15)'};
+                                    color: ${status === 'completed' ? '#00e676' : '#ffc107'};
+                                    padding: 2px 12px;
+                                    border-radius: 20px;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                ">${status.toUpperCase()}</span>
+                            </span>
+                        </div>
+                        <div style="text-align:right; font-size:12px; opacity:0.4; margin-top:6px;">
+                            <i class="fas fa-chevron-right"></i> Click to view details
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultArea.innerHTML = html;
+        }
+
+        emailInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                trackByEmail();
+            }
+        });
+
+        console.log('📦 Order tracking page ready.');
+    </script>
+
+</body>
+</html>
